@@ -53,11 +53,6 @@
     .connect-btn:hover {
       background: #2563eb;
     }
-    .connect-btn:active {
-      transform: scale(0.99);
-    }
-
-    /* Connected view */
     .connected-view {
       display: none;
     }
@@ -115,7 +110,7 @@
     </div>
   </div>
 
-  <!-- ✅ FIXED: Removed trailing space in src -->
+  <!-- ✅ FIXED: No trailing space! -->
   <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
   <script>
     let provider;
@@ -130,7 +125,7 @@
     const chainNames = {
       1: 'Ethereum',
       137: 'Polygon',
-      56: 'BSC',
+      56: 'BNB Chain',
       42161: 'Arbitrum',
       10: 'Optimism',
       8453: 'Base',
@@ -142,14 +137,8 @@
     connectBtn.addEventListener('click', connectWallet);
 
     async function connectWallet() {
-      // 🔹 Optional: check if ethers loaded
-      if (typeof ethers === 'undefined') {
-        alert('Library failed to load. Please refresh.');
-        return;
-      }
-
       if (typeof window.ethereum === 'undefined') {
-        alert('Please install a wallet like MetaMask or use a browser with wallet support.');
+        alert('Please open this page in Trust Wallet, MetaMask, or another Web3-compatible browser.');
         return;
       }
 
@@ -168,6 +157,7 @@
         initScreen.style.display = 'none';
         connectedScreen.style.display = 'block';
 
+        // Optional: refresh on account/network change
         window.ethereum.on('accountsChanged', (accounts) => {
           if (accounts.length === 0) {
             handleDisconnect();
@@ -182,7 +172,7 @@
 
       } catch (error) {
         console.error('Connection failed:', error);
-        alert('Wallet connection was rejected or failed.');
+        alert('Connection was rejected or failed.');
       }
     }
 

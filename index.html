@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web3 Wallet Access</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0f111a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #e0e0e0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .card {
+      background: #161a24;
+      padding: 32px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      text-align: center;
+    }
+    h1 {
+      font-size: 26px;
+      margin: 0 0 16px;
+      color: #fff;
+    }
+    .description {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #aaa;
+      margin-bottom: 28px;
+    }
+    .connect-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .connect-btn:hover {
+      background: #2563eb;
+    }
+    .connect-btn:active {
+      transform: scale(0.99);
+    }
+
+    /* Connected view */
+    .connected-view {
+      display: none;
+    }
+    .address {
+      font-family: monospace;
+      background: #0f131b;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 14px;
+      word-break: break-all;
+      color: #fff;
+    }
+    .network {
+      display: inline-block;
+      background: #22c55e;
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+    .disconnect-btn {
+      margin-top: 20px;
+      padding: 10px 16px;
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <!-- Initial Screen -->
+    <div id="initScreen">
+      <h1>Access Your Account</h1>
+      <p class="description">
+        Connect your crypto wallet to trade, swap, and manage digital assets securely.
+        Supported on Ethereum, Polygon, BSC, Arbitrum, Base, and more.
+      </p>
+      <button id="connectBtn" class="connect-btn">Connect Your Wallet</button>
+    </div>
+
+    <!-- Connected Screen -->
+    <div id="connectedScreen" class="connected-view">
+      <h1>Connected</h1>
+      <p>Your wallet address:</p>
+      <div class="address" id="userAddress">0x...</div>
+      <div class="network" id="networkName">—</div>
+      <button class="disconnect-btn" onclick="handleDisconnect()">Disconnect</button>
+    </div>
+  </div>
+
+  <!-- Load Ethers.js (lightweight, no React needed) -->
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+  <script>
+    let provider;
+    let signer;
+
+    // DOM Elements
+    const initScreen = document.getElementById('initScreen');
+    const connectedScreen = document.getElementById('connectedScreen');
+    const connectBtn = document.getElementById('connectBtn');
+    const userAddressEl = document.getElementById('userAddress');
+    const networkNameEl = document.getElementById('networkName');
+
+    // Chain ID to name mapping (for major EVM chains)
+    const chainNames = {
+      1: 'Ethereum',
+      137: 'Polygon',
+      56: 'BSC',
+      42161: 'Arbitrum',
+      10: 'Optimism',
+      8453: 'Base',
+      43114: 'Avalanche',
+      250: 'Fantom',
+      1101: 'Polygon zkEVM'
+    };
+
+    // Connect wallet on button click
+    connectBtn.addEventListener('click', connectWallet);
+
+    async function connectWallet() {
+      if (typeof window.ethereum === 'undefined') {
+        alert('Please install a wallet like MetaMask or use a browser with wallet support.');
+        return;
+      }
+
+      try {
+        // Request accounts
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const address = ethers.utils.getAddress(accounts[0]);
+        userAddressEl.textContent = address;
+
+        // Get network
+        const networkId = await window.ethereum.request({ method: 'net_version' });
+        const networkName = chainNames[networkId] || `Chain ${networkId}`;
+        networkNameEl.textContent = networkName;
+
+        // Set provider
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+
+        // Switch views
+        initScreen.style.display = 'none';
+        connectedScreen.style.display = 'block';
+
+        // Listen for account/network changes
+        window.ethereum.on('accountsChanged', (accounts) => {
+          if (accounts.length === 0) {
+            handleDisconnect();
+          } else {
+            userAddressEl.textContent = ethers.utils.getAddress(accounts[0]);
+          }
+        });
+
+        window.ethereum.on('chainChanged', () => {
+          location.reload(); // Simple reload on network switch
+        });
+
+      } catch (error) {
+        console.error('Connection failed:', error);
+        alert('Wallet connection was rejected or failed.');
+      }
+    }
+
+    function handleDisconnect() {
+      // Clear state
+      provider = null;
+      signer = null;
+      // Switch back
+      connectedScreen.style.display = 'none';
+      initScreen.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

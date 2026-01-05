@@ -115,20 +115,18 @@
     </div>
   </div>
 
-  <!-- Load Ethers.js (lightweight, no React needed) -->
+  <!-- ✅ FIXED: Removed trailing space in src -->
   <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
   <script>
     let provider;
     let signer;
 
-    // DOM Elements
     const initScreen = document.getElementById('initScreen');
     const connectedScreen = document.getElementById('connectedScreen');
     const connectBtn = document.getElementById('connectBtn');
     const userAddressEl = document.getElementById('userAddress');
     const networkNameEl = document.getElementById('networkName');
 
-    // Chain ID to name mapping (for major EVM chains)
     const chainNames = {
       1: 'Ethereum',
       137: 'Polygon',
@@ -141,35 +139,35 @@
       1101: 'Polygon zkEVM'
     };
 
-    // Connect wallet on button click
     connectBtn.addEventListener('click', connectWallet);
 
     async function connectWallet() {
+      // 🔹 Optional: check if ethers loaded
+      if (typeof ethers === 'undefined') {
+        alert('Library failed to load. Please refresh.');
+        return;
+      }
+
       if (typeof window.ethereum === 'undefined') {
         alert('Please install a wallet like MetaMask or use a browser with wallet support.');
         return;
       }
 
       try {
-        // Request accounts
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const address = ethers.utils.getAddress(accounts[0]);
         userAddressEl.textContent = address;
 
-        // Get network
         const networkId = await window.ethereum.request({ method: 'net_version' });
         const networkName = chainNames[networkId] || `Chain ${networkId}`;
         networkNameEl.textContent = networkName;
 
-        // Set provider
         provider = new ethers.providers.Web3Provider(window.ethereum);
         signer = provider.getSigner();
 
-        // Switch views
         initScreen.style.display = 'none';
         connectedScreen.style.display = 'block';
 
-        // Listen for account/network changes
         window.ethereum.on('accountsChanged', (accounts) => {
           if (accounts.length === 0) {
             handleDisconnect();
@@ -179,7 +177,7 @@
         });
 
         window.ethereum.on('chainChanged', () => {
-          location.reload(); // Simple reload on network switch
+          location.reload();
         });
 
       } catch (error) {
@@ -189,10 +187,8 @@
     }
 
     function handleDisconnect() {
-      // Clear state
       provider = null;
       signer = null;
-      // Switch back
       connectedScreen.style.display = 'none';
       initScreen.style.display = 'block';
     }

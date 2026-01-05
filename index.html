@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Web3 Wallet Access</title>
+  <title>Web3 Trading Platform</title>
   <style>
     body {
       margin: 0;
@@ -74,7 +74,12 @@
       border-radius: 20px;
       font-size: 12px;
       font-weight: bold;
-      margin-top: 8px;
+      margin: 8px 0;
+    }
+    .balance {
+      margin: 10px 0;
+      font-size: 16px;
+      color: #ddd;
     }
     .disconnect-btn {
       margin-top: 20px;
@@ -86,93 +91,139 @@
       font-size: 15px;
       cursor: pointer;
     }
+    .loading {
+      color: #666;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <!-- Initial Screen -->
     <div id="initScreen">
-      <h1>Access Your Account</h1>
+      <h1>Web3 Trading Platform</h1>
       <p class="description">
-        Connect your crypto wallet to trade, swap, and manage digital assets securely.
-        Supported on Ethereum, Polygon, BSC, Arbitrum, Base, and more.
+        Connect your wallet to view balances and trade crypto across chains.
       </p>
       <button id="connectBtn" class="connect-btn">Connect Your Wallet</button>
     </div>
 
     <!-- Connected Screen -->
     <div id="connectedScreen" class="connected-view">
-      <h1>Connected</h1>
-      <p>Your wallet address:</p>
+      <h1>Portfolio</h1>
       <div class="address" id="userAddress">0x...</div>
       <div class="network" id="networkName">—</div>
+      
+      <div class="balance" id="nativeBalance">ETH: <span class="loading">loading...</span></div>
+      <div class="balance" id="usdcBalance">USDC: <span class="loading">loading...</span></div>
+
       <button class="disconnect-btn" onclick="handleDisconnect()">Disconnect</button>
     </div>
   </div>
 
-  <!-- ✅ FIXED: No trailing space! -->
-  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+  <!-- Ethers.js from reliable CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <script>
     let provider;
     let signer;
+    let currentChainId;
+    let userAddress;
 
+    // DOM
     const initScreen = document.getElementById('initScreen');
     const connectedScreen = document.getElementById('connectedScreen');
     const connectBtn = document.getElementById('connectBtn');
     const userAddressEl = document.getElementById('userAddress');
     const networkNameEl = document.getElementById('networkName');
+    const nativeBalanceEl = document.getElementById('nativeBalance');
+    const usdcBalanceEl = document.getElementById('usdcBalance');
 
-    const chainNames = {
-      1: 'Ethereum',
-      137: 'Polygon',
-      56: 'BNB Chain',
-      42161: 'Arbitrum',
-      10: 'Optimism',
-      8453: 'Base',
-      43114: 'Avalanche',
-      250: 'Fantom',
-      1101: 'Polygon zkEVM'
+    // Chain config: id, name, native symbol, USDC address (if exists)
+    const chains = {
+      1: { name: 'Ethereum', symbol: 'ETH', usdc: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' },
+      137: { name: 'Polygon', symbol: 'MATIC', usdc: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174' },
+      56: { name: 'BNB Chain', symbol: 'BNB', usdc: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d' },
+      42161: { name: 'Arbitrum', symbol: 'ETH', usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831' },
+      8453: { name: 'Base', symbol: 'ETH', usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' },
+      10: { name: 'Optimism', symbol: 'ETH', usdc: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85' },
+      43114: { name: 'Avalanche', symbol: 'AVAX', usdc: '0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664' },
+      250: { name: 'Fantom', symbol: 'FTM', usdc: null }, // No official USDC
+      1101: { name: 'Polygon zkEVM', symbol: 'ETH', usdc: null }
     };
+
+    // ERC-20 minimal ABI
+    const erc20Abi = [
+      "function balanceOf(address owner) view returns (uint256)",
+      "function decimals() view returns (uint8)"
+    ];
 
     connectBtn.addEventListener('click', connectWallet);
 
     async function connectWallet() {
-      if (typeof window.ethereum === 'undefined') {
-        alert('Please open this page in Trust Wallet, MetaMask, or another Web3-compatible browser.');
+      if (!window.ethereum) {
+        alert('Please open in Trust Wallet dApp browser.');
+        return;
+      }
+      if (typeof ethers === 'undefined') {
+        alert('Library failed to load.');
         return;
       }
 
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const address = ethers.utils.getAddress(accounts[0]);
-        userAddressEl.textContent = address;
+        userAddress = ethers.utils.getAddress(accounts[0]);
+        userAddressEl.textContent = userAddress;
 
-        const networkId = await window.ethereum.request({ method: 'net_version' });
-        const networkName = chainNames[networkId] || `Chain ${networkId}`;
-        networkNameEl.textContent = networkName;
-
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
+        await setupProvider();
 
         initScreen.style.display = 'none';
         connectedScreen.style.display = 'block';
 
-        // Optional: refresh on account/network change
-        window.ethereum.on('accountsChanged', (accounts) => {
-          if (accounts.length === 0) {
-            handleDisconnect();
-          } else {
-            userAddressEl.textContent = ethers.utils.getAddress(accounts[0]);
-          }
-        });
+        // Auto-reload on network/account change
+        window.ethereum.on('accountsChanged', () => location.reload());
+        window.ethereum.on('chainChanged', () => location.reload());
 
-        window.ethereum.on('chainChanged', () => {
-          location.reload();
-        });
+      } catch (err) {
+        console.error(err);
+        alert('Connection failed. Please try again in Trust Wallet browser.');
+      }
+    }
 
-      } catch (error) {
-        console.error('Connection failed:', error);
-        alert('Connection was rejected or failed.');
+    async function setupProvider() {
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      signer = provider.getSigner();
+      const network = await provider.getNetwork();
+      currentChainId = Number(network.chainId);
+
+      const chain = chains[currentChainId] || { name: `Chain ${currentChainId}`, symbol: 'ETH', usdc: null };
+      networkNameEl.textContent = chain.name;
+
+      await updateBalances(chain);
+    }
+
+    async function updateBalances(chain) {
+      // Native balance (ETH, BNB, MATIC, etc.)
+      try {
+        const balance = await provider.getBalance(userAddress);
+        const formatted = parseFloat(ethers.utils.formatEther(balance)).toFixed(4);
+        nativeBalanceEl.innerHTML = `${chain.symbol}: ${formatted}`;
+      } catch (e) {
+        nativeBalanceEl.innerHTML = `${chain.symbol}: —`;
+      }
+
+      // USDC balance
+      if (chain.usdc) {
+        try {
+          const usdcContract = new ethers.Contract(chain.usdc, erc20Abi, provider);
+          const decimals = await usdcContract.decimals();
+          const balance = await usdcContract.balanceOf(userAddress);
+          const formatted = parseFloat(ethers.utils.formatUnits(balance, decimals)).toFixed(2);
+          usdcBalanceEl.innerHTML = `USDC: ${formatted}`;
+        } catch (e) {
+          usdcBalanceEl.innerHTML = `USDC: —`;
+        }
+      } else {
+        usdcBalanceEl.innerHTML = `USDC: —`;
       }
     }
 

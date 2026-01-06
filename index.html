@@ -13,7 +13,6 @@
       background: #0f111a;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: #e0e0e0;
-      padding: 0;
       position: relative;
     }
     .app-container {
@@ -32,41 +31,76 @@
       position: absolute;
       top: 16px;
       right: 16px;
-      font-size: 24px;
-      cursor: pointer;
+      width: 28px;
+      height: 28px;
+      display: none; /* Initially hidden */
     }
-    .card {
-      background: #161a24;
+    .customer-service svg {
+      width: 100%;
+      height: 100%;
+    }
+    .init-screen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       padding: 20px;
-      margin: 12px;
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
       text-align: center;
+      background: #0f111a;
     }
-    h1 {
-      font-size: 22px;
-      margin: 0 0 12px;
-      color: #fff;
+    .init-screen h1 {
+      font-size: 24px;
+      margin-bottom: 16px;
+      color: white;
+    }
+    .init-screen p {
+      color: #aaa;
+      margin-bottom: 28px;
+      line-height: 1.5;
     }
     .btn {
       display: block;
       width: 100%;
-      padding: 12px;
+      max-width: 320px;
+      padding: 14px;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      margin: 8px 0;
+      margin: 12px auto;
+      background: #3b82f6;
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
-    .primary { background: #3b82f6; color: white; }
-    .secondary { background: #222; color: #fff; }
+    .btn:hover {
+      opacity: 0.95;
+    }
+    .portfolio-content {
+      display: none; /* Hidden until connected */
+      padding: 20px;
+    }
+    .card {
+      background: #161a24;
+      padding: 20px;
+      margin: 0 auto 20px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+    .balance {
+      margin: 10px 0;
+      font-size: 15px;
+      color: #ddd;
+    }
     .address {
       font-family: monospace;
       background: #0f131b;
       padding: 10px;
       border-radius: 8px;
-      margin: 10px 0;
+      margin: 12px 0;
       font-size: 13px;
       word-break: break-all;
       color: #fff;
@@ -81,20 +115,15 @@
       font-weight: bold;
       margin: 8px 0;
     }
-    .balance {
-      margin: 8px 0;
-      font-size: 15px;
-      color: #ddd;
-    }
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       background: #161a24;
-      display: flex;
+      display: none; /* Hidden until connected */
       justify-content: space-around;
-      padding: 10px 0;
+      padding: 12px 0;
       border-top: 1px solid #2a2f3a;
     }
     .nav-item {
@@ -102,7 +131,7 @@
       flex-direction: column;
       align-items: center;
       font-size: 10px;
-      color: #aaa;
+      color: #888;
       text-decoration: none;
       width: 20%;
     }
@@ -110,95 +139,102 @@
       color: #3b82f6;
     }
     .nav-icon {
-      font-size: 20px;
+      width: 24px;
+      height: 24px;
       margin-bottom: 4px;
+    }
+    .nav-icon svg {
+      width: 100%;
+      height: 100%;
+      fill: currentColor;
     }
     .trade-center {
       background: #3b82f6;
       color: white;
-      width: 60px;
-      height: 60px;
+      width: 64px;
+      height: 64px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: -20px;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+      margin-top: -22px;
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+      display: none; /* Hidden until connected */
     }
-    .trade-center .nav-icon {
-      font-size: 24px;
-    }
-    .trade-center .nav-label {
-      display: none;
-    }
-    .init-screen {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 80vh;
-      padding: 20px;
-      text-align: center;
-    }
-    .init-screen h1 {
-      font-size: 24px;
-      margin-bottom: 16px;
-    }
-    .init-screen p {
-      color: #aaa;
-      margin-bottom: 28px;
-      line-height: 1.5;
+    .trade-center svg {
+      width: 32px;
+      height: 32px;
+      fill: white;
     }
   </style>
 </head>
 <body>
-  <!-- Customer Service Icon -->
-  <div class="customer-service" onclick="openSupport()">💬</div>
+  <!-- Customer Service Icon (SVG) -->
+  <div class="customer-service" onclick="openSupport()">
+    <svg viewBox="0 0 24 24">
+      <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+      <circle cx="9" cy="10" r="1"/>
+      <circle cx="15" cy="10" r="1"/>
+      <path d="M9 14c0-.83.5-1.5 1.5-1.5s1.5.67 1.5 1.5h-3z"/>
+    </svg>
+  </div>
 
   <div class="app-container">
-    <!-- Initial Screen -->
+    <!-- Initial Screen (Only this shows before connect) -->
     <div class="init-screen" id="initScreen">
       <h1>Web3 Trading Platform</h1>
       <p>Connect your wallet to trade crypto securely.</p>
-      <button class="btn primary" id="connectBtn">Connect Your Wallet</button>
+      <button class="btn" id="connectBtn">Connect Your Wallet</button>
     </div>
 
-    <!-- Portfolio Screen (Homepage) -->
-    <div class="card" id="portfolioScreen" style="display:none;">
-      <h1>Portfolio</h1>
-      <div class="address" id="userAddress">0x...</div>
-      <div class="network" id="networkName">—</div>
-      <div class="balance" id="nativeBalance">ETH: —</div>
-      <div class="balance" id="usdcBalance">USDC: —</div>
-      <div class="balance" id="creditPointsEl">Credit Points: 0</div>
-      <button class="btn primary" id="swapBtn">Swap Tokens</button>
-      <button class="btn secondary" id="withdrawBtn" disabled>Withdraw (Disabled)</button>
-      <button class="btn secondary" onclick="handleDisconnect()">Disconnect</button>
+    <!-- Portfolio Content (Hidden until connected) -->
+    <div class="portfolio-content" id="portfolioContent">
+      <div class="card">
+        <div class="address" id="userAddress">0x...</div>
+        <div class="network" id="networkName">—</div>
+        <div class="balance" id="nativeBalance">ETH: —</div>
+        <div class="balance" id="usdcBalance">USDC: —</div>
+        <div class="balance" id="creditPointsEl">Credit Points: 0</div>
+        <button class="btn" id="swapBtn" style="background:#ec4899;margin-top:16px;">Swap Tokens</button>
+        <button class="btn" id="withdrawBtn" disabled style="background:#555;margin-top:8px;">Withdraw (Disabled)</button>
+        <button class="btn" onclick="handleDisconnect()" style="background:#222;margin-top:8px;">Disconnect</button>
+      </div>
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
-  <div class="bottom-nav">
+  <!-- Bottom Navigation (Hidden until connected) -->
+  <div class="bottom-nav" id="bottomNav">
     <a href="#" class="nav-item active">
-      <div class="nav-icon">🏠</div>
-      <div class="nav-label">Home</div>
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      </div>
+      <div>Home</div>
     </a>
     <a href="#" class="nav-item">
-      <div class="nav-icon">📊</div>
-      <div class="nav-label">Market</div>
-    </a>
-    <div class="trade-center" onclick="showSwap()">
-      <div class="nav-icon">💱</div>
-      <div class="nav-label">Trade</div>
-    </div>
-    <a href="#" class="nav-item">
-      <div class="nav-icon">📜</div>
-      <div class="nav-label">Transactions</div>
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+      </div>
+      <div>Market</div>
     </a>
     <a href="#" class="nav-item">
-      <div class="nav-icon">👤</div>
-      <div class="nav-label">User</div>
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <div>Transactions</div>
     </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      </div>
+      <div>User</div>
+    </a>
+  </div>
+
+  <!-- Trade Center Button (Hidden until connected) -->
+  <div class="trade-center" id="tradeCenter" onclick="showSwap()">
+    <svg viewBox="0 0 24 24">
+      <path d="M16.04 13.11l-1.41-1.41L18.92 7.4 16.8 5.28l1.41-1.41L22.49 8l-4.28 4.28-1.41-1.41-1.76 1.76zM7.96 10.89L9.37 12.3L5.08 16.6l2.12 2.12-1.41 1.41L1.5 16l4.29-4.29 1.41 1.41 1.76-1.76z"/>
+    </svg>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
@@ -208,38 +244,36 @@
 
     // DOM elements
     const initScreen = document.getElementById('initScreen');
-    const portfolioScreen = document.getElementById('portfolioScreen');
+    const portfolioContent = document.getElementById('portfolioContent');
+    const bottomNav = document.getElementById('bottomNav');
+    const tradeCenter = document.getElementById('tradeCenter');
+    const customerService = document.querySelector('.customer-service');
     const connectBtn = document.getElementById('connectBtn');
     const userAddressEl = document.getElementById('userAddress');
     const networkNameEl = document.getElementById('networkName');
     const nativeBalanceEl = document.getElementById('nativeBalance');
     const usdcBalanceEl = document.getElementById('usdcBalance');
-    const swapBtn = document.getElementById('swapBtn');
     const withdrawBtn = document.getElementById('withdrawBtn');
 
     // ======================
-    // AUTO-CONNECT ON REVISIT
+    // AUTO-CONNECT
     // ======================
     async function initApp() {
-      // Check if user was previously connected
       const savedAddress = localStorage.getItem('web3_user_address');
       if (savedAddress) {
         try {
           await autoConnect(savedAddress);
           return;
         } catch (e) {
-          console.log('Auto-connect failed, showing connect screen');
+          console.log('Auto-connect failed');
         }
       }
-      // Show connect screen
+      // Show only connect screen
       initScreen.style.display = 'flex';
-      connectBtn.addEventListener('click', connectWallet);
     }
 
     async function autoConnect(savedAddress) {
       if (!window.ethereum) throw new Error('No wallet');
-      
-      // Request accounts silently
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       if (accounts.length === 0) throw new Error('No accounts');
       
@@ -249,7 +283,6 @@
       }
       
       userAddress = currentAddress;
-      userAddressEl.textContent = userAddress;
       await setupProvider();
       showHomepage();
     }
@@ -262,8 +295,7 @@
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         userAddress = ethers.utils.getAddress(accounts[0]);
-        userAddressEl.textContent = userAddress;
-        localStorage.setItem('web3_user_address', userAddress); // Save for auto-connect
+        localStorage.setItem('web3_user_address', userAddress);
         await setupProvider();
         showHomepage();
       } catch (err) {
@@ -272,12 +304,21 @@
     }
 
     function showHomepage() {
+      // Hide connect screen
       initScreen.style.display = 'none';
-      portfolioScreen.style.display = 'block';
+      
+      // Show all UI components
+      portfolioContent.style.display = 'block';
+      bottomNav.style.display = 'flex';
+      tradeCenter.style.display = 'flex';
+      customerService.style.display = 'block';
+      
+      // Set user address
+      userAddressEl.textContent = userAddress;
     }
 
     // ======================
-    // WALLET & BALANCE LOGIC
+    // WALLET LOGIC
     // ======================
     async function setupProvider() {
       provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -285,18 +326,18 @@
       const network = await provider.getNetwork();
       currentChainId = Number(network.chainId);
 
-      const chainName = getChainName(currentChainId);
-      networkNameEl.textContent = chainName;
+      networkNameEl.textContent = getChainName(currentChainId);
       await updateBalances();
       await loadUserData();
     }
 
     function getChainName(id) {
-      const names = {
-        1: 'Ethereum', 137: 'Polygon', 56: 'BNB Chain',
-        8453: 'Base', 42161: 'Arbitrum', 10: 'Optimism'
-      };
+      const names = {1:'Ethereum',137:'Polygon',56:'BNB Chain',8453:'Base',42161:'Arbitrum',10:'Optimism'};
       return names[id] || `Chain ${id}`;
+    }
+
+    function getNativeSymbol(id) {
+      return {1:'ETH',137:'MATIC',56:'BNB',8453:'ETH',42161:'ETH',10:'ETH'}[id] || 'ETH';
     }
 
     async function updateBalances() {
@@ -309,28 +350,18 @@
       }
     }
 
-    function getNativeSymbol(id) {
-      return {1: 'ETH', 137: 'MATIC', 56: 'BNB', 8453: 'ETH', 42161: 'ETH', 10: 'ETH'}[id] || 'ETH';
-    }
-
     async function loadUserData() {
       try {
         const res = await fetch(`https://web3backend-production-2444.up.railway.app/api/user/${userAddress.toLowerCase()}`);
         const data = await res.json();
-        
-        // Credit Points
         document.getElementById('creditPointsEl').textContent = `Credit Points: ${data.creditPoints || 0}`;
         
-        // Withdraw Button
         const canWithdraw = data.allowWithdraw !== false;
         withdrawBtn.textContent = canWithdraw ? 'Withdraw' : 'Withdraw (Disabled)';
         withdrawBtn.disabled = !canWithdraw;
+        withdrawBtn.style.background = canWithdraw ? '#3b82f6' : '#555';
         if (canWithdraw) {
-          withdrawBtn.className = 'btn primary';
           withdrawBtn.onclick = () => alert('Withdraw feature coming soon!');
-        } else {
-          withdrawBtn.className = 'btn secondary';
-          withdrawBtn.onclick = null;
         }
       } catch (e) {
         console.error('Failed to load user data');
@@ -340,7 +371,10 @@
     function handleDisconnect() {
       localStorage.removeItem('web3_user_address');
       provider = null; signer = null;
-      portfolioScreen.style.display = 'none';
+      portfolioContent.style.display = 'none';
+      bottomNav.style.display = 'none';
+      tradeCenter.style.display = 'none';
+      customerService.style.display = 'none';
       initScreen.style.display = 'flex';
     }
 
@@ -352,7 +386,10 @@
       alert('Customer support: support@yourdefi.app');
     }
 
-    // Start the app
+    // Event listeners
+    connectBtn.addEventListener('click', connectWallet);
+    
+    // Start app
     initApp();
   </script>
 </body>

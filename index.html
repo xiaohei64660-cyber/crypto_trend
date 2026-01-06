@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +11,7 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: #f8fafc url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABkAAAAcICAYAAADXQeK7AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAA...') center/cover fixed;
+      background: #f8fafc url('image/png;base64,iVBORw0KGgoAAAANSUhEUgAABkAAAAcICAYAAADXQeK7AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAA...') center/cover fixed;
       background-blend-mode: lighten;
       opacity: 0.92;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -230,6 +231,12 @@
       background: #3b82f6;
       color: white;
     }
+    #chartContainer {
+      height: 250px !important;
+      margin: 12px 0;
+      border-radius: 12px;
+      background: white;
+    }
   </style>
 </head>
 <body>
@@ -295,7 +302,7 @@
       </div>
     </div>
 
-    <!-- Market List Screen -->
+    <!-- Market List Screen (Back button hidden) -->
     <div class="market-list-screen" id="marketListScreen">
       <div class="header" style="padding:16px 16px 12px; text-align:left;">
         <h2 style="font-size:18px; margin:0;">Market</h2>
@@ -306,10 +313,11 @@
     <!-- Market Chart Screen -->
     <div class="market-content" id="marketContent">
       <div class="header" style="padding:16px 16px 12px;">
-        <button class="btn" style="position:absolute; left:16px; background:#3b82f6; padding:6px 12px; font-size:14px;" onclick="backToMarketList()">← Back</button>
+        <!-- Back button hidden by default, will appear only on chart screen -->
+        <button class="btn" id="backBtn" style="position:absolute; left:16px; background:#3b82f6; padding:6px 12px; font-size:14px; display:none;" onclick="backToMarketList()">← Back</button>
         <h2 id="marketHeader" style="font-size:18px; margin:0;">Market</h2>
       </div>
-      <div id="chartContainer" style="height:250px; margin:12px 0; border-radius:12px; background:white;"></div>
+      <div id="chartContainer"></div>
       <div style="display:flex; gap:8px; margin:12px 0;">
         <button class="tf-btn active" data-tf="15">15m</button>
         <button class="tf-btn" data-tf="60">1h</button>
@@ -364,6 +372,7 @@
     const homeContent = document.getElementById('homeContent');
     const marketListScreen = document.getElementById('marketListScreen');
     const marketContent = document.getElementById('marketContent');
+    const backBtn = document.getElementById('backBtn');
     const bottomNav = document.getElementById('bottomNav');
     const customerService = document.getElementById('customerService');
     const networkIndicator = document.getElementById('networkIndicator');
@@ -440,6 +449,7 @@
       marketListScreen.style.display = 'none';
       marketContent.style.display = 'block';
       document.getElementById('marketHeader').textContent = `${name} (${symbol.toUpperCase()})`;
+      backBtn.style.display = 'block'; // Show back button only on chart
       loadChart(coinId);
     }
 
@@ -507,6 +517,7 @@
     function backToMarketList() {
       marketContent.style.display = 'none';
       marketListScreen.style.display = 'block';
+      backBtn.style.display = 'none'; // Hide when returning
     }
 
     function setActiveTab(activeTab) {
@@ -532,6 +543,7 @@
       homeContent.style.display = 'block';
       marketListScreen.style.display = 'none';
       marketContent.style.display = 'none';
+      backBtn.style.display = 'none';
       setActiveTab(homeTab);
     });
 
@@ -540,6 +552,7 @@
       homeContent.style.display = 'none';
       marketListScreen.style.display = 'block';
       marketContent.style.display = 'none';
+      backBtn.style.display = 'none';
       fetchCryptoPrices();
       setActiveTab(marketTab);
     });
@@ -611,6 +624,7 @@
       homeContent.style.display = 'block';
       marketListScreen.style.display = 'none';
       marketContent.style.display = 'none';
+      backBtn.style.display = 'none';
       bottomNav.style.display = 'flex';
       customerService.style.display = 'flex';
       networkIndicator.style.display = 'flex';
@@ -659,6 +673,7 @@
       homeContent.style.display = 'none';
       marketListScreen.style.display = 'none';
       marketContent.style.display = 'none';
+      backBtn.style.display = 'none';
       bottomNav.style.display = 'none';
       customerService.style.display = 'none';
       networkIndicator.style.display = 'none';

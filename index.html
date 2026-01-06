@@ -238,6 +238,24 @@
   </div>
 
   <div class="app-container">
+    <!-- Market Content (Hidden by default) -->
+<div class="market-content" id="marketContent" style="display:none; padding:0 16px;">
+  <div class="header" style="padding:16px 16px 12px;">
+    <button class="btn" style="position:absolute; left:16px; background:#3b82f6; padding:6px 12px; font-size:14px;" onclick="backToMarketList()">← Back</button>
+    <h2 id="marketHeader" style="font-size:18px; margin:0;">Market</h2>
+  </div>
+  
+  <!-- Chart Container -->
+  <div id="chartContainer" style="height:250px; margin:12px 0; border-radius:12px; background:white;"></div>
+  
+  <!-- Timeframes -->
+  <div style="display:flex; gap:8px; margin:12px 0;">
+    <button class="tf-btn active" data-tf="15">15m</button>
+    <button class="tf-btn" data-tf="60">1h</button>
+    <button class="tf-btn" data-tf="240">4h</button>
+    <button class="tf-btn" data-tf="1440">1D</button>
+  </div>
+</div>
     <!-- Initial Screen -->
     <div class="init-screen" id="initScreen">
       <h1>CTTP</h1>

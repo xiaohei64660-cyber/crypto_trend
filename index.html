@@ -10,10 +10,11 @@
     body {
       margin: 0;
       min-height: 100vh;
-      /* Embed your uploaded image as base64 to avoid cache issues */
-      background: #0f111a url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABkAAAAcICAYAAADXQeK7AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAA...') center/cover fixed;
+      /* Light theme with subtle crypto background */
+      background: #f8fafc url('https://i.ibb.co/8M3q1nG/crypto-bg-3.jpg') center/cover fixed;
+      background-blend-mode: overlay;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      color: #e0e0e0;
+      color: #1e293b;
       position: relative;
     }
     .app-container {
@@ -26,19 +27,25 @@
       position: relative;
       padding: 16px 16px 12px;
       text-align: center;
-      color: white;
+      color: #1e293b;
     }
     .network-indicator {
       position: absolute;
       top: 16px;
       left: 16px;
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(4px);
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid #e2e8f0;
       padding: 6px 12px;
       border-radius: 20px;
       font-size: 16px;
       font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       display: none;
+    }
+    .network-icon {
+      font-size: 18px;
     }
     .customer-service {
       position: absolute;
@@ -47,12 +54,12 @@
       width: 44px;
       height: 44px;
       display: none;
-      background: #f59e0b; /* Amber/Yellow */
+      background: #f59e0b; /* Amber */
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
       z-index: 10;
     }
     .customer-service svg {
@@ -68,15 +75,15 @@
       height: 100vh;
       padding: 20px;
       text-align: center;
-      background: rgba(15, 17, 26, 0.85);
+      background: rgba(255, 255, 255, 0.9);
     }
     .init-screen h1 {
       font-size: 28px;
       margin-bottom: 16px;
-      color: white;
+      color: #0f172a;
     }
     .init-screen p {
-      color: #aaa;
+      color: #64748b;
       margin-bottom: 28px;
       line-height: 1.5;
     }
@@ -93,7 +100,7 @@
       margin: 12px auto;
       background: #3b82f6;
       color: white;
-      box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
     }
     .home-content {
       display: none;
@@ -102,40 +109,40 @@
     }
     .slideshow-placeholder {
       height: 180px;
-      background: rgba(22, 26, 36, 0.7);
+      background: rgba(255, 255, 255, 0.7);
       margin-bottom: 24px;
       border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #94a3b8;
+      color: #64748b;
       font-size: 14px;
-      border: 1px dashed #2a2f3a;
+      border: 1px dashed #cbd5e1;
       backdrop-filter: blur(2px);
     }
     .withdrawals-header {
       font-size: 18px;
       font-weight: 600;
       margin: 28px 0 16px;
-      color: white;
+      color: #0f172a;
       text-align: center;
     }
     .withdrawals-section {
       padding: 0 8px;
     }
     .withdrawal-item {
-      background: rgba(22, 26, 36, 0.7);
+      background: rgba(255, 255, 255, 0.8);
       padding: 12px;
       border-radius: 12px;
       margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       font-size: 15px;
-      border: 1px solid #2a2f3a;
+      border: 1px solid #e2e8f0;
       backdrop-filter: blur(2px);
     }
     .withdrawal-name {
-      color: #f8fafc;
+      color: #1e293b;
     }
     .withdrawal-amount {
       color: #10b981;
@@ -146,11 +153,11 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(22, 26, 36, 0.9);
+      background: rgba(255, 255, 255, 0.9);
       display: none;
       justify-content: space-around;
       padding: 10px 0;
-      border-top: 1px solid #2a2f3a;
+      border-top: 1px solid #e2e8f0;
       backdrop-filter: blur(4px);
     }
     .nav-item {
@@ -158,7 +165,7 @@
       flex-direction: column;
       align-items: center;
       font-size: 10px;
-      color: #888;
+      color: #94a3b8;
       text-decoration: none;
       width: 20%;
     }
@@ -179,7 +186,10 @@
 </head>
 <body>
   <!-- Network Icon (Left) -->
-  <div class="network-indicator" id="networkIndicator">Ξ</div>
+  <div class="network-indicator" id="networkIndicator">
+    <span class="network-icon">Ξ</span>
+    <span>Ethereum</span>
+  </div>
 
   <!-- Customer Service (Right - Amber) -->
   <div class="customer-service" onclick="openSupport()" id="customerService">
@@ -278,16 +288,16 @@
     const networkIndicator = document.getElementById('networkIndicator');
     const connectBtn = document.getElementById('connectBtn');
 
-    // Network icons
-    const networkIcons = {
-      1: 'Ξ',    // Ethereum
-      137: 'MATIC', // Polygon
-      56: 'BNB', // BNB
-      8453: 'ETH', // Base
-      42161: 'ETH', // Arbitrum
-      10: 'ETH', // Optimism
-      // Add Bitcoin if needed
-      0: '₿' // Bitcoin placeholder
+    // Network icons and names
+    const networkConfig = {
+      1: { icon: 'Ξ', name: 'Ethereum' },
+      137: { icon: 'MATIC', name: 'Polygon' },
+      56: { icon: 'BNB', name: 'BNB Chain' },
+      8453: { icon: 'ETH', name: 'Base' },
+      42161: { icon: 'ETH', name: 'Arbitrum' },
+      10: { icon: 'ETH', name: 'Optimism' },
+      // Add Bitcoin if needed (e.g., for Bitcoin Layer)
+      0: { icon: '₿', name: 'Bitcoin' }
     };
 
     const firstNames = ['Alex', 'Sam', 'Taylor', 'Jordan', 'Casey', 'Riley', 'Morgan', 'Drew', 'Avery', 'Quinn'];
@@ -369,8 +379,10 @@
       const network = await provider.getNetwork();
       currentChainId = Number(network.chainId);
 
-      // Show network icon
-      networkIndicator.textContent = networkIcons[currentChainId] || 'Ξ';
+      // Update network indicator
+      const config = networkConfig[currentChainId] || networkConfig[1];
+      document.querySelector('.network-icon').textContent = config.icon;
+      document.querySelector('.network-indicator span:last-child').textContent = config.name;
     }
 
     function handleDisconnect() {

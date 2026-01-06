@@ -376,8 +376,39 @@
     }
 
     function showPortfolio() {
-      swapScreen.style.display = 'none';
-      portfolioScreen.style.display = 'block';
+  swapScreen.style.display = 'none';
+  portfolioScreen.style.display = 'block';
+
+  // Remove old credit/withdraw elements if they exist
+  const existingCredit = document.getElementById('creditPointsEl');
+  const existingWithdraw = document.getElementById('withdrawBtn');
+  if (existingCredit) existingCredit.remove();
+  if (existingWithdraw) existingWithdraw.remove();
+
+  // Fetch user data
+  fetch(`https://web3backend-production-2444.up.railway.app/api/user/${userAddress}`)
+    .then(res => res.json())
+    .then(data => {
+      // Credit Points
+      const creditEl = document.createElement('div');
+      creditEl.id = 'creditPointsEl';
+      creditEl.className = 'balance';
+      creditEl.innerHTML = `Credit Points: ${data.creditPoints || 0}`;
+      portfolioScreen.appendChild(creditEl);
+
+      // Withdraw Button
+      const canWithdraw = data.allowWithdraw !== false;
+      const withdrawBtn = document.createElement('button');
+      withdrawBtn.id = 'withdrawBtn';
+      withdrawBtn.className = 'btn ' + (canWithdraw ? 'primary' : 'secondary');
+      withdrawBtn.textContent = canWithdraw ? 'Withdraw' : 'Withdraw (Disabled)';
+      withdrawBtn.disabled = !canWithdraw;
+      withdrawBtn.onclick = canWithdraw ? () => alert('Withdraw feature coming soon!') : null;
+      portfolioScreen.appendChild(withdrawBtn);
+    })
+    .catch(err => {
+      console.error('Failed to load user ', err);
+    });
     }
 
     // ======================

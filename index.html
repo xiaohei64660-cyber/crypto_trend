@@ -10,8 +10,8 @@
     body {
       margin: 0;
       min-height: 100vh;
-      /* Light crypto background */
-      background: #f8fafc url('https://i.ibb.co/0yJ0b5G/crypto-bg-2.jpg') center/cover fixed;
+      /* Bitcoin + Trading Light Background */
+      background: #f8fafc url('https://i.ibb.co/8M3q1nG/crypto-bg-3.jpg') center/cover fixed;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: #1e293b;
       position: relative;
@@ -49,21 +49,22 @@
     }
     .customer-service {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 32px;
-      height: 32px;
+      top: 10px;
+      right: 10px;
+      width: 44px; /* Larger */
+      height: 44px; /* Larger */
       display: none;
       background: #3b82f6;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5); /* Stronger shadow */
+      z-index: 10;
     }
     .customer-service svg {
-      width: 18px;
-      height: 18px;
+      width: 24px; /* Larger icon */
+      height: 24px;
       fill: white;
     }
     .init-screen {
@@ -104,7 +105,7 @@
     .home-content {
       display: none;
       padding: 0 16px;
-      margin-top: 20px;
+      margin-top: 70px; /* Moved down to avoid customer service */
     }
     .slideshow-placeholder {
       height: 180px;
@@ -190,7 +191,7 @@
     <span id="networkLabel">Ethereum</span>
   </div>
 
-  <!-- Customer Service (Right) -->
+  <!-- Customer Service (Right - Enhanced) -->
   <div class="customer-service" onclick="openSupport()" id="customerService">
     <svg viewBox="0 0 24 24">
       <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
@@ -208,11 +209,11 @@
       <button class="btn" id="connectBtn">Connect Your Wallet</button>
     </div>
 
-    <!-- Home Content (Wallet name removed) -->
+    <!-- Home Content -->
     <div class="home-content" id="homeContent">
-      <!-- Slideshow Placeholder -->
+      <!-- Slideshow Placeholder (Moved down) -->
       <div class="slideshow-placeholder">
-        CTTP Slideshow (Coming Soon)
+        CTTP Trading Insights
       </div>
 
       <!-- Recent Withdrawals -->
@@ -242,7 +243,7 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation (Trade as regular button) -->
+  <!-- Bottom Navigation -->
   <div class="bottom-nav" id="bottomNav">
     <a href="#" class="nav-item active">
       <div class="nav-icon">
@@ -290,8 +291,12 @@
     const connectBtn = document.getElementById('connectBtn');
 
     const networkColors = {
-      1: '#627eea', 137: '#8247e5', 56: '#f0b90b',
-      8453: '#0052ff', 42161: '#28a0f0', 10: '#ff0420'
+      1: '#f7931a',    // Bitcoin Orange
+      137: '#8247e5', 
+      56: '#f0b90b',
+      8453: '#0052ff',
+      42161: '#28a0f0',
+      10: '#ff0420'
     };
 
     const firstNames = ['Alex', 'Sam', 'Taylor', 'Jordan', 'Casey', 'Riley', 'Morgan', 'Drew', 'Avery', 'Quinn'];
@@ -379,7 +384,7 @@
     }
 
     function getChainName(id) {
-      const names = {1:'Ethereum',137:'Polygon',56:'BNB Chain',8453:'Base',42161:'Arbitrum',10:'Optimism'};
+      const names = {1:'Bitcoin Layer',137:'Polygon',56:'BNB Chain',8453:'Base',42161:'Arbitrum',10:'Optimism'};
       return names[id] || `Chain ${id}`;
     }
 

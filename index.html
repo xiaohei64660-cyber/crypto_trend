@@ -143,6 +143,26 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <script>
+    async function fetchAppConfig() {
+  try {
+    const res = await fetch('https://web3backend-production-2444.up.railway.app/api/config');
+    appConfig = await res.json();
+
+    if (!appConfig.enabled) {
+      alert('Platform is currently disabled.');
+      return false;
+    }
+    if (appConfig.maintenance) {
+      alert('Platform is under maintenance.');
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Failed to load config', e);
+    alert('Failed to load platform settings. Please check your internet connection.');
+    return false;
+  }
+    }
     // === Existing wallet & swap logic (unchanged) ===
     let provider, signer, userAddress, currentChainId;
     const API_BASE = 'https://api.1inch.dev/swap/v5.2';

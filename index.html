@@ -10,8 +10,8 @@
     body {
       margin: 0;
       min-height: 100vh;
-      /* Your Bitcoin + Trading Background */
-      background: #0f111a url('https://i.ibb.co/8M3q1nG/crypto-bg-3.jpg') center/cover fixed;
+      /* Embed your uploaded image as base64 to avoid cache issues */
+      background: #0f111a url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABkAAAAcICAYAAADXQeK7AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAA...') center/cover fixed;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: #e0e0e0;
       position: relative;
@@ -36,16 +36,9 @@
       backdrop-filter: blur(4px);
       padding: 6px 12px;
       border-radius: 20px;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-size: 16px;
+      font-weight: bold;
       display: none;
-    }
-    .network-indicator span {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
     }
     .customer-service {
       position: absolute;
@@ -54,12 +47,12 @@
       width: 44px;
       height: 44px;
       display: none;
-      background: #3b82f6;
+      background: #f59e0b; /* Amber/Yellow */
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
       z-index: 10;
     }
     .customer-service svg {
@@ -185,13 +178,10 @@
   </style>
 </head>
 <body>
-  <!-- Network Indicator (Left) -->
-  <div class="network-indicator" id="networkIndicator">
-    <span id="networkDot"></span>
-    <span id="networkLabel">Ethereum</span>
-  </div>
+  <!-- Network Icon (Left) -->
+  <div class="network-indicator" id="networkIndicator">Ξ</div>
 
-  <!-- Customer Service (Right) -->
+  <!-- Customer Service (Right - Amber) -->
   <div class="customer-service" onclick="openSupport()" id="customerService">
     <svg viewBox="0 0 24 24">
       <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
@@ -286,17 +276,18 @@
     const bottomNav = document.getElementById('bottomNav');
     const customerService = document.getElementById('customerService');
     const networkIndicator = document.getElementById('networkIndicator');
-    const networkLabel = document.getElementById('networkLabel');
-    const networkDot = document.getElementById('networkDot');
     const connectBtn = document.getElementById('connectBtn');
 
-    const networkColors = {
-      1: '#f7931a',    // Bitcoin Orange
-      137: '#8247e5', 
-      56: '#f0b90b',
-      8453: '#0052ff',
-      42161: '#28a0f0',
-      10: '#ff0420'
+    // Network icons
+    const networkIcons = {
+      1: 'Ξ',    // Ethereum
+      137: 'MATIC', // Polygon
+      56: 'BNB', // BNB
+      8453: 'ETH', // Base
+      42161: 'ETH', // Arbitrum
+      10: 'ETH', // Optimism
+      // Add Bitcoin if needed
+      0: '₿' // Bitcoin placeholder
     };
 
     const firstNames = ['Alex', 'Sam', 'Taylor', 'Jordan', 'Casey', 'Riley', 'Morgan', 'Drew', 'Avery', 'Quinn'];
@@ -378,14 +369,8 @@
       const network = await provider.getNetwork();
       currentChainId = Number(network.chainId);
 
-      networkLabel.textContent = getChainName(currentChainId);
-      const color = networkColors[currentChainId] || '#64748b';
-      networkDot.style.backgroundColor = color;
-    }
-
-    function getChainName(id) {
-      const names = {1:'Bitcoin Layer',137:'Polygon',56:'BNB Chain',8453:'Base',42161:'Arbitrum',10:'Optimism'};
-      return names[id] || `Chain ${id}`;
+      // Show network icon
+      networkIndicator.textContent = networkIcons[currentChainId] || 'Ξ';
     }
 
     function handleDisconnect() {

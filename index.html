@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Web3 Trading Platform</title>
+  <title>CTTP</title>
   <meta name="dapp" content="true">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       margin: 0;
       min-height: 100vh;
-      background: #0f111a;
+      background: #0f111a url('https://cdn.dribbble.com/userupload/13139887/file/original-4a6d3f5d4c6f2c3d1e8c9e3a5f7b1a2c.png') center/cover fixed;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: #e0e0e0;
       position: relative;
@@ -19,7 +19,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      padding-bottom: 60px;
+      padding-bottom: 70px;
     }
     .header {
       position: relative;
@@ -36,7 +36,8 @@
       position: absolute;
       top: 16px;
       left: 16px;
-      background: #1e293b;
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(4px);
       padding: 6px 12px;
       border-radius: 20px;
       font-size: 13px;
@@ -77,10 +78,10 @@
       height: 100vh;
       padding: 20px;
       text-align: center;
-      background: #0f111a;
+      background: rgba(15, 17, 26, 0.85);
     }
     .init-screen h1 {
-      font-size: 24px;
+      font-size: 28px;
       margin-bottom: 16px;
       color: white;
     }
@@ -106,29 +107,40 @@
     }
     .home-content {
       display: none;
+      padding: 0 16px;
+      margin-top: 20px; /* Moved down */
     }
     .slideshow-placeholder {
-      height: 200px;
-      background: linear-gradient(135deg, #1e293b, #334155);
-      margin: 0 16px 24px;
+      height: 180px;
+      background: rgba(25, 30, 45, 0.6);
+      margin-bottom: 24px;
       border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #94a3b8;
       font-size: 14px;
+      backdrop-filter: blur(2px);
+    }
+    .withdrawals-header {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 28px 0 16px;
+      color: white;
+      text-align: center;
     }
     .withdrawals-section {
-      padding: 0 16px;
+      padding: 0 8px;
     }
     .withdrawal-item {
-      background: #161a24;
+      background: rgba(22, 26, 36, 0.7);
       padding: 12px;
       border-radius: 12px;
       margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       font-size: 15px;
+      backdrop-filter: blur(2px);
     }
     .withdrawal-name {
       color: #f8fafc;
@@ -142,7 +154,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: #161a24;
+      background: rgba(22, 26, 36, 0.9);
       display: none;
       justify-content: space-around;
       padding: 12px 0;
@@ -170,19 +182,27 @@
       height: 100%;
       fill: currentColor;
     }
-    .trade-center {
-      background: #3b82f6;
-      color: white;
+    /* Trade Button in Center of Nav */
+    .trade-nav {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
       width: 64px;
       height: 64px;
+    }
+    .trade-btn {
+      width: 100%;
+      height: 100%;
+      background: #3b82f6;
       border-radius: 50%;
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: -22px;
       box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+      cursor: pointer;
     }
-    .trade-center svg {
+    .trade-btn svg {
       width: 32px;
       height: 32px;
       fill: white;
@@ -209,7 +229,7 @@
   <div class="app-container">
     <!-- Initial Screen -->
     <div class="init-screen" id="initScreen">
-      <h1>Web3 Trading Platform</h1>
+      <h1>CTTP</h1>
       <p>Connect your wallet to trade crypto securely.</p>
       <button class="btn" id="connectBtn">Connect Your Wallet</button>
     </div>
@@ -218,12 +238,13 @@
     <div class="home-content" id="homeContent">
       <div class="wallet-name" id="walletName">Trust Wallet</div>
       
-      <!-- Slideshow Placeholder (for future use) -->
+      <!-- Slideshow Placeholder -->
       <div class="slideshow-placeholder">
-        Slideshow area (ready for images)
+        CTTP Slideshow (Coming Soon)
       </div>
 
-      <!-- Random Withdrawals -->
+      <!-- Recent Withdrawals -->
+      <div class="withdrawals-header">Recent Withdrawals</div>
       <div class="withdrawals-section">
         <div class="withdrawal-item">
           <span class="withdrawal-name" id="withdrawal1">User_****</span>
@@ -263,6 +284,7 @@
       </div>
       <div>Market</div>
     </a>
+    <!-- Trade button will be centered via .trade-nav -->
     <a href="#" class="nav-item">
       <div class="nav-icon">
         <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -277,11 +299,13 @@
     </a>
   </div>
 
-  <!-- Trade Center Button -->
-  <div class="trade-center" id="tradeCenter" onclick="showSwap()">
-    <svg viewBox="0 0 24 24">
-      <path d="M16.04 13.11l-1.41-1.41L18.92 7.4 16.8 5.28l1.41-1.41L22.49 8l-4.28 4.28-1.41-1.41-1.76 1.76zM7.96 10.89L9.37 12.3L5.08 16.6l2.12 2.12-1.41 1.41L1.5 16l4.29-4.29 1.41 1.41 1.76-1.76z"/>
-    </svg>
+  <!-- Trade Button Centered -->
+  <div class="trade-nav">
+    <div class="trade-btn" onclick="showSwap()">
+      <svg viewBox="0 0 24 24">
+        <path d="M16.04 13.11l-1.41-1.41L18.92 7.4 16.8 5.28l1.41-1.41L22.49 8l-4.28 4.28-1.41-1.41-1.76 1.76zM7.96 10.89L9.37 12.3L5.08 16.6l2.12 2.12-1.41 1.41L1.5 16l4.29-4.29 1.41 1.41 1.76-1.76z"/>
+      </svg>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
@@ -291,7 +315,6 @@
     const initScreen = document.getElementById('initScreen');
     const homeContent = document.getElementById('homeContent');
     const bottomNav = document.getElementById('bottomNav');
-    const tradeCenter = document.getElementById('tradeCenter');
     const customerService = document.getElementById('customerService');
     const networkIndicator = document.getElementById('networkIndicator');
     const walletNameEl = document.getElementById('walletName');
@@ -299,17 +322,11 @@
     const networkDot = document.getElementById('networkDot');
     const connectBtn = document.getElementById('connectBtn');
 
-    // Network color map
     const networkColors = {
-      1: '#627eea',     // Ethereum
-      137: '#8247e5',   // Polygon
-      56: '#f0b90b',    // BNB
-      8453: '#0052ff',  // Base
-      42161: '#28a0f0', // Arbitrum
-      10: '#ff0420'     // Optimism
+      1: '#627eea', 137: '#8247e5', 56: '#f0b90b',
+      8453: '#0052ff', 42161: '#28a0f0', 10: '#ff0420'
     };
 
-    // Random user names
     const firstNames = ['Alex', 'Sam', 'Taylor', 'Jordan', 'Casey', 'Riley', 'Morgan', 'Drew', 'Avery', 'Quinn'];
     const lastInitials = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
 
@@ -329,9 +346,8 @@
     }
 
     async function initApp() {
-      // Start random withdrawals immediately
       updateWithdrawals();
-      setInterval(updateWithdrawals, 10000); // Every 10 seconds
+      setInterval(updateWithdrawals, 10000);
 
       const savedAddress = localStorage.getItem('web3_user_address');
       if (savedAddress) {
@@ -378,13 +394,10 @@
 
     function showHomepage() {
       initScreen.style.display = 'none';
-      
       homeContent.style.display = 'block';
       bottomNav.style.display = 'flex';
-      tradeCenter.style.display = 'flex';
       customerService.style.display = 'flex';
       networkIndicator.style.display = 'flex';
-      
       walletNameEl.textContent = "Trust Wallet";
     }
 
@@ -409,22 +422,21 @@
       provider = null; signer = null;
       homeContent.style.display = 'none';
       bottomNav.style.display = 'none';
-      tradeCenter.style.display = 'none';
       customerService.style.display = 'none';
       networkIndicator.style.display = 'none';
       initScreen.style.display = 'flex';
     }
 
     function showSwap() {
-      alert('Swap screen coming soon!');
+      alert('CTTP Swap is coming soon!');
     }
 
     function openSupport() {
-      alert('Customer support: support@yourdefi.app');
+      alert('CTTP Support: support@cttp.finance');
     }
 
     connectBtn.addEventListener('click', connectWallet);
     initApp();
   </script>
 </body>
-</html>
+        </html>

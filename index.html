@@ -23,9 +23,32 @@
     }
     .header {
       position: relative;
-      padding: 16px;
+      padding: 16px 16px 12px;
       text-align: center;
       color: white;
+    }
+    .wallet-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .network-indicator {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      display: none;
+      background: #1e293b;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .network-indicator span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
     }
     .customer-service {
       position: absolute;
@@ -33,7 +56,7 @@
       right: 16px;
       width: 28px;
       height: 28px;
-      display: none; /* Initially hidden */
+      display: none;
     }
     .customer-service svg {
       width: 100%;
@@ -74,46 +97,10 @@
       color: white;
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
-    .btn:hover {
-      opacity: 0.95;
-    }
-    .portfolio-content {
-      display: none; /* Hidden until connected */
+    .home-content {
+      display: none;
+      text-align: center;
       padding: 20px;
-    }
-    .card {
-      background: #161a24;
-      padding: 20px;
-      margin: 0 auto 20px;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-    }
-    .balance {
-      margin: 10px 0;
-      font-size: 15px;
-      color: #ddd;
-    }
-    .address {
-      font-family: monospace;
-      background: #0f131b;
-      padding: 10px;
-      border-radius: 8px;
-      margin: 12px 0;
-      font-size: 13px;
-      word-break: break-all;
-      color: #fff;
-    }
-    .network {
-      display: inline-block;
-      background: #22c55e;
-      color: #000;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-      margin: 8px 0;
     }
     .bottom-nav {
       position: fixed;
@@ -121,7 +108,7 @@
       left: 0;
       right: 0;
       background: #161a24;
-      display: none; /* Hidden until connected */
+      display: none;
       justify-content: space-around;
       padding: 12px 0;
       border-top: 1px solid #2a2f3a;
@@ -154,12 +141,11 @@
       width: 64px;
       height: 64px;
       border-radius: 50%;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       margin-top: -22px;
       box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
-      display: none; /* Hidden until connected */
     }
     .trade-center svg {
       width: 32px;
@@ -169,7 +155,13 @@
   </style>
 </head>
 <body>
-  <!-- Customer Service Icon (SVG) -->
+  <!-- Network Indicator (Left) -->
+  <div class="network-indicator" id="networkIndicator">
+    <span id="networkDot"></span>
+    <span id="networkLabel">Ethereum</span>
+  </div>
+
+  <!-- Customer Service (Right) -->
   <div class="customer-service" onclick="openSupport()">
     <svg viewBox="0 0 24 24">
       <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
@@ -180,29 +172,23 @@
   </div>
 
   <div class="app-container">
-    <!-- Initial Screen (Only this shows before connect) -->
+    <!-- Initial Screen -->
     <div class="init-screen" id="initScreen">
       <h1>Web3 Trading Platform</h1>
       <p>Connect your wallet to trade crypto securely.</p>
       <button class="btn" id="connectBtn">Connect Your Wallet</button>
     </div>
 
-    <!-- Portfolio Content (Hidden until connected) -->
-    <div class="portfolio-content" id="portfolioContent">
-      <div class="card">
-        <div class="address" id="userAddress">0x...</div>
-        <div class="network" id="networkName">—</div>
-        <div class="balance" id="nativeBalance">ETH: —</div>
-        <div class="balance" id="usdcBalance">USDC: —</div>
-        <div class="balance" id="creditPointsEl">Credit Points: 0</div>
-        <button class="btn" id="swapBtn" style="background:#ec4899;margin-top:16px;">Swap Tokens</button>
-        <button class="btn" id="withdrawBtn" disabled style="background:#555;margin-top:8px;">Withdraw (Disabled)</button>
-        <button class="btn" onclick="handleDisconnect()" style="background:#222;margin-top:8px;">Disconnect</button>
+    <!-- Home Content (Clean) -->
+    <div class="home-content" id="homeContent">
+      <div class="wallet-name" id="walletName">Trust Wallet - Wallet 1</div>
+      <div style="margin-top: 40px; font-size: 16px; color: #aaa;">
+        Welcome to your Web3 platform
       </div>
     </div>
   </div>
 
-  <!-- Bottom Navigation (Hidden until connected) -->
+  <!-- Bottom Navigation -->
   <div class="bottom-nav" id="bottomNav">
     <a href="#" class="nav-item active">
       <div class="nav-icon">
@@ -230,7 +216,7 @@
     </a>
   </div>
 
-  <!-- Trade Center Button (Hidden until connected) -->
+  <!-- Trade Center Button -->
   <div class="trade-center" id="tradeCenter" onclick="showSwap()">
     <svg viewBox="0 0 24 24">
       <path d="M16.04 13.11l-1.41-1.41L18.92 7.4 16.8 5.28l1.41-1.41L22.49 8l-4.28 4.28-1.41-1.41-1.76 1.76zM7.96 10.89L9.37 12.3L5.08 16.6l2.12 2.12-1.41 1.41L1.5 16l4.29-4.29 1.41 1.41 1.76-1.76z"/>
@@ -239,25 +225,36 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <script>
-    // Global variables
     let provider, signer, userAddress, currentChainId;
 
-    // DOM elements
     const initScreen = document.getElementById('initScreen');
-    const portfolioContent = document.getElementById('portfolioContent');
+    const homeContent = document.getElementById('homeContent');
     const bottomNav = document.getElementById('bottomNav');
     const tradeCenter = document.getElementById('tradeCenter');
     const customerService = document.querySelector('.customer-service');
+    const networkIndicator = document.getElementById('networkIndicator');
+    const walletNameEl = document.getElementById('walletName');
+    const networkLabel = document.getElementById('networkLabel');
+    const networkDot = document.getElementById('networkDot');
     const connectBtn = document.getElementById('connectBtn');
-    const userAddressEl = document.getElementById('userAddress');
-    const networkNameEl = document.getElementById('networkName');
-    const nativeBalanceEl = document.getElementById('nativeBalance');
-    const usdcBalanceEl = document.getElementById('usdcBalance');
-    const withdrawBtn = document.getElementById('withdrawBtn');
 
-    // ======================
-    // AUTO-CONNECT
-    // ======================
+    // Network color map
+    const networkColors = {
+      1: '#627eea',     // Ethereum
+      137: '#8247e5',   // Polygon
+      56: '#f0b90b',    // BNB
+      8453: '#0052ff',  // Base
+      42161: '#28a0f0', // Arbitrum
+      10: '#ff0420'     // Optimism
+    };
+
+    // Wallet name map (mock)
+    function getWalletName() {
+      // In real app, you can't get "Wallet 1" from Trust Wallet
+      // So we show a friendly name based on provider
+      return "Trust Wallet";
+    }
+
     async function initApp() {
       const savedAddress = localStorage.getItem('web3_user_address');
       if (savedAddress) {
@@ -268,7 +265,6 @@
           console.log('Auto-connect failed');
         }
       }
-      // Show only connect screen
       initScreen.style.display = 'flex';
     }
 
@@ -304,31 +300,27 @@
     }
 
     function showHomepage() {
-      // Hide connect screen
       initScreen.style.display = 'none';
       
-      // Show all UI components
-      portfolioContent.style.display = 'block';
+      homeContent.style.display = 'block';
       bottomNav.style.display = 'flex';
       tradeCenter.style.display = 'flex';
       customerService.style.display = 'block';
+      networkIndicator.style.display = 'flex';
       
-      // Set user address
-      userAddressEl.textContent = userAddress;
+      walletNameEl.textContent = getWalletName();
     }
 
-    // ======================
-    // WALLET LOGIC
-    // ======================
     async function setupProvider() {
       provider = new ethers.providers.Web3Provider(window.ethereum);
       signer = provider.getSigner();
       const network = await provider.getNetwork();
       currentChainId = Number(network.chainId);
 
-      networkNameEl.textContent = getChainName(currentChainId);
-      await updateBalances();
-      await loadUserData();
+      // Update network indicator
+      networkLabel.textContent = getChainName(currentChainId);
+      const color = networkColors[currentChainId] || '#64748b';
+      networkDot.style.backgroundColor = color;
     }
 
     function getChainName(id) {
@@ -336,45 +328,14 @@
       return names[id] || `Chain ${id}`;
     }
 
-    function getNativeSymbol(id) {
-      return {1:'ETH',137:'MATIC',56:'BNB',8453:'ETH',42161:'ETH',10:'ETH'}[id] || 'ETH';
-    }
-
-    async function updateBalances() {
-      const symbol = getNativeSymbol(currentChainId);
-      try {
-        const ethBal = await provider.getBalance(userAddress);
-        nativeBalanceEl.textContent = `${symbol}: ${parseFloat(ethers.utils.formatEther(ethBal)).toFixed(4)}`;
-      } catch (e) {
-        nativeBalanceEl.textContent = `${symbol}: —`;
-      }
-    }
-
-    async function loadUserData() {
-      try {
-        const res = await fetch(`https://web3backend-production-2444.up.railway.app/api/user/${userAddress.toLowerCase()}`);
-        const data = await res.json();
-        document.getElementById('creditPointsEl').textContent = `Credit Points: ${data.creditPoints || 0}`;
-        
-        const canWithdraw = data.allowWithdraw !== false;
-        withdrawBtn.textContent = canWithdraw ? 'Withdraw' : 'Withdraw (Disabled)';
-        withdrawBtn.disabled = !canWithdraw;
-        withdrawBtn.style.background = canWithdraw ? '#3b82f6' : '#555';
-        if (canWithdraw) {
-          withdrawBtn.onclick = () => alert('Withdraw feature coming soon!');
-        }
-      } catch (e) {
-        console.error('Failed to load user data');
-      }
-    }
-
     function handleDisconnect() {
       localStorage.removeItem('web3_user_address');
       provider = null; signer = null;
-      portfolioContent.style.display = 'none';
+      homeContent.style.display = 'none';
       bottomNav.style.display = 'none';
       tradeCenter.style.display = 'none';
       customerService.style.display = 'none';
+      networkIndicator.style.display = 'none';
       initScreen.style.display = 'flex';
     }
 
@@ -386,10 +347,7 @@
       alert('Customer support: support@yourdefi.app');
     }
 
-    // Event listeners
     connectBtn.addEventListener('click', connectWallet);
-    
-    // Start app
     initApp();
   </script>
 </body>

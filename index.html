@@ -10,7 +10,8 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: #f8fafc;
+      /* Light crypto background */
+      background: #f8fafc url('https://i.ibb.co/0yJ0b5G/crypto-bg-2.jpg') center/cover fixed;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: #1e293b;
       position: relative;
@@ -19,7 +20,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      padding-bottom: 70px;
+      padding-bottom: 60px;
     }
     .header {
       position: relative;
@@ -27,17 +28,11 @@
       text-align: center;
       color: #1e293b;
     }
-    .wallet-name {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #0f172a;
-    }
     .network-indicator {
       position: absolute;
       top: 16px;
       left: 16px;
-      background: rgba(241, 245, 249, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       border: 1px solid #e2e8f0;
       padding: 6px 12px;
       border-radius: 20px;
@@ -56,19 +51,19 @@
       position: absolute;
       top: 12px;
       right: 12px;
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       display: none;
       background: #3b82f6;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
     }
     .customer-service svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       fill: white;
     }
     .init-screen {
@@ -79,7 +74,7 @@
       height: 100vh;
       padding: 20px;
       text-align: center;
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.9);
     }
     .init-screen h1 {
       font-size: 28px;
@@ -113,7 +108,7 @@
     }
     .slideshow-placeholder {
       height: 180px;
-      background: #f1f5f9;
+      background: rgba(255, 255, 255, 0.7);
       margin-bottom: 24px;
       border-radius: 16px;
       display: flex;
@@ -122,6 +117,7 @@
       color: #64748b;
       font-size: 14px;
       border: 1px dashed #cbd5e1;
+      backdrop-filter: blur(2px);
     }
     .withdrawals-header {
       font-size: 18px;
@@ -134,7 +130,7 @@
       padding: 0 8px;
     }
     .withdrawal-item {
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.8);
       padding: 12px;
       border-radius: 12px;
       margin-bottom: 12px;
@@ -142,7 +138,7 @@
       justify-content: space-between;
       font-size: 15px;
       border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      backdrop-filter: blur(2px);
     }
     .withdrawal-name {
       color: #1e293b;
@@ -156,11 +152,12 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.9);
       display: none;
       justify-content: space-around;
-      padding: 12px 0;
+      padding: 10px 0;
       border-top: 1px solid #e2e8f0;
+      backdrop-filter: blur(4px);
     }
     .nav-item {
       display: flex;
@@ -183,32 +180,6 @@
       width: 100%;
       height: 100%;
       fill: currentColor;
-    }
-    /* Trade Button in Center of Nav */
-    .trade-nav {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%) translateY(-50%);
-      width: 64px;
-      height: 64px;
-      display: none; /* Hidden on connect screen */
-    }
-    .trade-btn {
-      width: 100%;
-      height: 100%;
-      background: #3b82f6;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-      cursor: pointer;
-    }
-    .trade-btn svg {
-      width: 32px;
-      height: 32px;
-      fill: white;
     }
   </style>
 </head>
@@ -237,10 +208,8 @@
       <button class="btn" id="connectBtn">Connect Your Wallet</button>
     </div>
 
-    <!-- Home Content -->
+    <!-- Home Content (Wallet name removed) -->
     <div class="home-content" id="homeContent">
-      <div class="wallet-name" id="walletName">Trust Wallet</div>
-      
       <!-- Slideshow Placeholder -->
       <div class="slideshow-placeholder">
         CTTP Slideshow (Coming Soon)
@@ -273,7 +242,7 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
+  <!-- Bottom Navigation (Trade as regular button) -->
   <div class="bottom-nav" id="bottomNav">
     <a href="#" class="nav-item active">
       <div class="nav-icon">
@@ -286,6 +255,12 @@
         <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
       </div>
       <div>Market</div>
+    </a>
+    <a href="#" class="nav-item" onclick="showSwap()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M16.04 13.11l-1.41-1.41L18.92 7.4 16.8 5.28l1.41-1.41L22.49 8l-4.28 4.28-1.41-1.41-1.76 1.76zM7.96 10.89L9.37 12.3L5.08 16.6l2.12 2.12-1.41 1.41L1.5 16l4.29-4.29 1.41 1.41 1.76-1.76z"/></svg>
+      </div>
+      <div>Trade</div>
     </a>
     <a href="#" class="nav-item">
       <div class="nav-icon">
@@ -301,15 +276,6 @@
     </a>
   </div>
 
-  <!-- Trade Button Centered -->
-  <div class="trade-nav" id="tradeNav">
-    <div class="trade-btn" onclick="showSwap()">
-      <svg viewBox="0 0 24 24">
-        <path d="M16.04 13.11l-1.41-1.41L18.92 7.4 16.8 5.28l1.41-1.41L22.49 8l-4.28 4.28-1.41-1.41-1.76 1.76zM7.96 10.89L9.37 12.3L5.08 16.6l2.12 2.12-1.41 1.41L1.5 16l4.29-4.29 1.41 1.41 1.76-1.76z"/>
-      </svg>
-    </div>
-  </div>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <script>
     let provider, signer, userAddress, currentChainId;
@@ -317,10 +283,8 @@
     const initScreen = document.getElementById('initScreen');
     const homeContent = document.getElementById('homeContent');
     const bottomNav = document.getElementById('bottomNav');
-    const tradeNav = document.getElementById('tradeNav');
     const customerService = document.getElementById('customerService');
     const networkIndicator = document.getElementById('networkIndicator');
-    const walletNameEl = document.getElementById('walletName');
     const networkLabel = document.getElementById('networkLabel');
     const networkDot = document.getElementById('networkDot');
     const connectBtn = document.getElementById('connectBtn');
@@ -362,7 +326,6 @@
         }
       }
       initScreen.style.display = 'flex';
-      tradeNav.style.display = 'none'; // Hide on connect screen
     }
 
     async function autoConnect(savedAddress) {
@@ -400,10 +363,8 @@
       initScreen.style.display = 'none';
       homeContent.style.display = 'block';
       bottomNav.style.display = 'flex';
-      tradeNav.style.display = 'block'; // Show after connect
       customerService.style.display = 'flex';
       networkIndicator.style.display = 'flex';
-      walletNameEl.textContent = "Trust Wallet";
     }
 
     async function setupProvider() {
@@ -427,7 +388,6 @@
       provider = null; signer = null;
       homeContent.style.display = 'none';
       bottomNav.style.display = 'none';
-      tradeNav.style.display = 'none';
       customerService.style.display = 'none';
       networkIndicator.style.display = 'none';
       initScreen.style.display = 'flex';

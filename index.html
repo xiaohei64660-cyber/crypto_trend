@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,6 +28,22 @@
       text-align: center;
       color: white;
     }
+    .network-indicator {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(30, 41, 59, 0.7);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .network-icon {
+      font-size: 18px;
+    }
     .customer-service {
       position: absolute;
       top: 10px;
@@ -44,6 +61,29 @@
       width: 24px;
       height: 24px;
       fill: white;
+    }
+    .network-list {
+      position: absolute;
+      top: 50px;
+      left: 16px;
+      background: rgba(22, 26, 36, 0.95);
+      border: 1px solid #2a2f3a;
+      border-radius: 12px;
+      padding: 12px;
+      z-index: 100;
+      display: none;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .network-item {
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin: 4px 0;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .network-item:hover {
+      background: #334155;
     }
     .init-screen {
       display: flex;
@@ -80,10 +120,44 @@
       color: #000;
       box-shadow: 0 4px 6px rgba(240, 185, 11, 0.3);
     }
-    .home-content, .market-screen {
+    .home-content, .market-screen, .chart-screen {
       display: none;
       padding: 0 16px;
       margin-top: 70px;
+    }
+    .slideshow-placeholder {
+      height: 180px;
+      background: #161A24;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .withdrawals-header {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 28px 0 16px;
+      color: white;
+      text-align: center;
+    }
+    .withdrawal-item {
+      background: #161A24;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 15px;
+    }
+    .withdrawal-name {
+      color: #f8fafc;
+    }
+    .withdrawal-amount {
+      color: #4ECB71;
+      font-weight: 600;
     }
     .bottom-nav {
       position: fixed;
@@ -162,9 +236,66 @@
     }
     .positive { color: #4ECB71; }
     .negative { color: #F6465D; }
+    
+    /* Chart Screen */
+    .chart-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 16px 12px;
+      color: white;
+    }
+    .back-btn {
+      background: #F0B90B;
+      color: #000;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+    #chartContainer {
+      height: 250px;
+      background: #161A24;
+      border-radius: 12px;
+      margin: 12px 0;
+    }
+    .timeframes {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .tf-btn {
+      padding: 6px 12px;
+      border: 1px solid #2a2f3a;
+      background: #161A24;
+      color: #EAECEF;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .tf-btn.active {
+      background: #F0B90B;
+      color: #000;
+    }
   </style>
 </head>
 <body>
+  <!-- Network Indicator -->
+  <div class="network-indicator" id="networkIndicator">
+    <span class="network-icon">Ξ</span>
+    <span>Ethereum</span>
+  </div>
+
+  <!-- Network List -->
+  <div class="network-list" id="networkList">
+    <div class="network-item" data-chain="1">Ξ Ethereum</div>
+    <div class="network-item" data-chain="137">MATIC Polygon</div>
+    <div class="network-item" data-chain="56">BNB BNB Chain</div>
+    <div class="network-item" data-chain="8453">ETH Base</div>
+    <div class="network-item" data-chain="42161">ETH Arbitrum</div>
+    <div class="network-item" data-chain="10">ETH Optimism</div>
+  </div>
+
   <!-- Customer Service -->
   <div class="customer-service" onclick="openSupport()" id="customerService">
     <svg viewBox="0 0 24 24">
@@ -185,10 +316,14 @@
 
     <!-- Home Content -->
     <div class="home-content" id="homeContent">
-      <div style="color:#aaa; text-align:center; margin-top:40px;">Welcome to CTTP</div>
+      <div class="slideshow-placeholder">
+        CTTP Trading Insights
+      </div>
+      <div class="withdrawals-header">Recent Withdrawals</div>
+      <div class="withdrawals-section" id="withdrawalsSection"></div>
     </div>
 
-    <!-- Market Screen (Binance Style) -->
+    <!-- Market Screen -->
     <div class="market-screen" id="marketScreen">
       <div class="market-header">
         <div>Coin</div>
@@ -197,6 +332,21 @@
         <div>Volume</div>
       </div>
       <div id="marketList"></div>
+    </div>
+
+    <!-- Chart Screen -->
+    <div class="chart-screen" id="chartScreen">
+      <div class="chart-header">
+        <button class="back-btn" onclick="backToMarket()">← Back</button>
+        <h2 id="chartTitle" style="font-size:18px; margin:0;">Market</h2>
+      </div>
+      <div id="chartContainer"></div>
+      <div class="timeframes">
+        <button class="tf-btn active" data-tf="15">15m</button>
+        <button class="tf-btn" data-tf="60">1h</button>
+        <button class="tf-btn" data-tf="240">4h</button>
+        <button class="tf-btn" data-tf="1440">1D</button>
+      </div>
     </div>
   </div>
 
@@ -236,19 +386,57 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <script>
+    let chart = null;
+    let currentCoin = null;
+    let currentTf = '15';
+    let provider, signer, userAddress, currentChainId;
+
     const initScreen = document.getElementById('initScreen');
     const homeContent = document.getElementById('homeContent');
     const marketScreen = document.getElementById('marketScreen');
+    const chartScreen = document.getElementById('chartScreen');
     const bottomNav = document.getElementById('bottomNav');
     const customerService = document.getElementById('customerService');
+    const networkIndicator = document.getElementById('networkIndicator');
+    const networkList = document.getElementById('networkList');
     const connectBtn = document.getElementById('connectBtn');
     const homeTab = document.getElementById('homeTab');
     const marketTab = document.getElementById('marketTab');
+    const tradeTab = document.getElementById('tradeTab');
+    const transactionsTab = document.getElementById('transactionsTab');
+    const userTab = document.getElementById('userTab');
 
-    // Binance-style market data
+    const networkConfig = {
+      1: { icon: 'Ξ', name: 'Ethereum' },
+      137: { icon: 'MATIC', name: 'Polygon' },
+      56: { icon: 'BNB', name: 'BNB Chain' },
+      8453: { icon: 'ETH', name: 'Base' },
+      42161: { icon: 'ETH', name: 'Arbitrum' },
+      10: { icon: 'ETH', name: 'Optimism' }
+    };
+
+    // Generate random withdrawals
+    function generateWithdrawals() {
+      const names = ['Alex', 'Sam', 'Taylor', 'Jordan', 'Casey', 'Riley', 'Morgan'];
+      const amounts = [1240, 890, 2100, 560, 1750, 320, 940];
+      const section = document.getElementById('withdrawalsSection');
+      section.innerHTML = '';
+      
+      for (let i = 0; i < 5; i++) {
+        const item = document.createElement('div');
+        item.className = 'withdrawal-item';
+        item.innerHTML = `
+          <span class="withdrawal-name">${names[i]}_****</span>
+          <span class="withdrawal-amount">$${amounts[i].toLocaleString()} USD</span>
+        `;
+        section.appendChild(item);
+      }
+    }
+
+    // Fetch full market data (100+ coins)
     async function fetchMarketData() {
       try {
-        const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1&sparkline=false');
+        const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h');
         const data = await res.json();
         const list = document.getElementById('marketList');
         list.innerHTML = '';
@@ -257,6 +445,8 @@
           const change24h = coin.price_change_percentage_24h;
           const changeClass = change24h >= 0 ? 'positive' : 'negative';
           const changeText = (change24h >= 0 ? '+' : '') + change24h.toFixed(2) + '%';
+          const volume = coin.total_volume;
+          const volumeText = volume >= 1e9 ? '$' + (volume / 1e9).toFixed(2) + 'B' : '$' + (volume / 1e6).toFixed(2) + 'M';
           
           const row = document.createElement('div');
           row.className = 'market-row';
@@ -270,8 +460,9 @@
             </div>
             <div class="price-col">$${coin.current_price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}</div>
             <div class="change-col ${changeClass}">${changeText}</div>
-            <div class="volume-col">$${(coin.total_volume / 1e6).toFixed(2)}M</div>
+            <div class="volume-col">${volumeText}</div>
           `;
+          row.onclick = () => showChart(coin.id, coin.name, coin.symbol);
           list.appendChild(row);
         });
       } catch (e) {
@@ -279,30 +470,166 @@
       }
     }
 
-    marketTab.addEventListener('click', (e) => {
-      e.preventDefault();
-      homeContent.style.display = 'none';
+    // Show chart
+    function showChart(coinId, name, symbol) {
+      marketScreen.style.display = 'none';
+      chartScreen.style.display = 'block';
+      document.getElementById('chartTitle').textContent = `${name} (${symbol.toUpperCase()})`;
+      loadChart(coinId);
+    }
+
+    // Load chart
+    async function loadChart(coinId) {
+      currentCoin = coinId;
+      
+      if (!window.LightweightCharts) {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js';
+        document.head.appendChild(script);
+        script.onload = createChart;
+      } else {
+        createChart();
+      }
+    }
+
+    function createChart() {
+      const container = document.getElementById('chartContainer');
+      container.innerHTML = '';
+      
+      chart = window.LightweightCharts.createChart(container, {
+        width: container.clientWidth,
+        height: 250,
+        layout: { backgroundColor: '#161A24', textColor: '#EAECEF' },
+        grid: { vertLines: { color: '#2a2f3a' }, horzLines: { color: '#2a2f3a' } },
+        crosshair: { mode: 0 },
+        priceScale: { borderColor: '#2a2f3a' },
+        timeScale: { borderColor: '#2a2f3a', timeVisible: true }
+      });
+      
+      const candleSeries = chart.addCandlestickSeries({
+        upColor: '#4ECB71',
+        downColor: '#F6465D',
+        borderVisible: false,
+        wickUpColor: '#4ECB71',
+        wickDownColor: '#F6465D',
+      });
+      
+      fetchChartData(currentCoin, currentTf, candleSeries);
+    }
+
+    async function fetchChartData(coinId, tf, series) {
+      const daysMap = { '15': '1', '60': '1', '240': '7', '1440': '30' };
+      const days = daysMap[tf] || '1';
+      
+      try {
+        const res = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${days}`);
+        const data = await res.json();
+        
+        const formatted = data.map(d => ({
+          time: Math.floor(d[0] / 1000),
+          open: d[1],
+          high: d[2],
+          low: d[3],
+          close: d[4]
+        }));
+        
+        series.setData(formatted);
+        chart.timeScale().fitContent();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function backToMarket() {
+      chartScreen.style.display = 'none';
       marketScreen.style.display = 'block';
-      fetchMarketData();
-      setActiveTab(marketTab);
+    }
+
+    // Timeframe buttons
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('tf-btn')) {
+        document.querySelectorAll('.tf-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        currentTf = e.target.dataset.tf;
+        if (chart) fetchChartData(currentCoin, currentTf, chart.series[0]);
+      }
     });
 
+    // Tab navigation
     homeTab.addEventListener('click', (e) => {
       e.preventDefault();
       homeContent.style.display = 'block';
       marketScreen.style.display = 'none';
+      chartScreen.style.display = 'none';
       setActiveTab(homeTab);
+    });
+
+    marketTab.addEventListener('click', (e) => {
+      e.preventDefault();
+      homeContent.style.display = 'none';
+      marketScreen.style.display = 'block';
+      chartScreen.style.display = 'none';
+      fetchMarketData();
+      setActiveTab(marketTab);
+    });
+
+    tradeTab.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Trade feature coming soon!');
+    });
+
+    transactionsTab.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Transactions feature coming soon!');
+    });
+
+    userTab.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('User profile feature coming soon!');
     });
 
     function setActiveTab(activeTab) {
       homeTab.classList.remove('active');
       marketTab.classList.remove('active');
-      document.getElementById('tradeTab').classList.remove('active');
-      document.getElementById('transactionsTab').classList.remove('active');
-      document.getElementById('userTab').classList.remove('active');
+      tradeTab.classList.remove('active');
+      transactionsTab.classList.remove('active');
+      userTab.classList.remove('active');
       activeTab.classList.add('active');
     }
 
+    // Network switching
+    networkIndicator.addEventListener('click', () => {
+      networkList.style.display = 'block';
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!networkIndicator.contains(e.target) && !networkList.contains(e.target)) {
+        networkList.style.display = 'none';
+      }
+    });
+
+    networkList.addEventListener('click', async (e) => {
+      if (e.target.classList.contains('network-item')) {
+        const chainId = e.target.dataset.chain;
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x' + parseInt(chainId).toString(16) }]
+          });
+          // Re-initialize provider
+          const network = await new ethers.providers.Web3Provider(window.ethereum).getNetwork();
+          currentChainId = Number(network.chainId);
+          const config = networkConfig[currentChainId] || networkConfig[1];
+          document.querySelector('.network-icon').textContent = config.icon;
+          document.querySelector('.network-indicator span:last-child').textContent = config.name;
+          networkList.style.display = 'none';
+        } catch (err) {
+          alert('Failed to switch network');
+        }
+      }
+    });
+
+    // Wallet connection
     async function connectWallet() {
       if (!window.ethereum) {
         alert('Please use Trust Wallet');
@@ -310,7 +637,8 @@
       }
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        localStorage.setItem('web3_user_address', accounts[0]);
+        userAddress = ethers.utils.getAddress(accounts[0]);
+        localStorage.setItem('web3_user_address', userAddress);
         showHomepage();
       } catch (err) {
         alert('Connection failed');
@@ -322,12 +650,16 @@
       homeContent.style.display = 'block';
       bottomNav.style.display = 'flex';
       customerService.style.display = 'flex';
+      networkIndicator.style.display = 'flex';
+      generateWithdrawals();
     }
 
     connectBtn.addEventListener('click', connectWallet);
-    
+
     // Auto-connect
     if (localStorage.getItem('web3_user_address')) {
+      const accounts = localStorage.getItem('web3_user_address');
+      userAddress = accounts;
       showHomepage();
     } else {
       initScreen.style.display = 'flex';

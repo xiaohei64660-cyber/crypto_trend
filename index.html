@@ -221,7 +221,7 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      background: #2A2E39;
+      object-fit: cover;
     }
     .price-col, .change-col, .volume-col {
       text-align: right;
@@ -252,23 +252,7 @@
       height: 300px;
       border-radius: 12px;
       overflow: hidden;
-    }
-    .timeframes {
-      display: flex;
-      gap: 8px;
-      margin: 12px 0;
-    }
-    .tf-btn {
-      padding: 6px 12px;
-      border: 1px solid #2a2f3a;
       background: #161A24;
-      color: #EAECEF;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .tf-btn.active {
-      background: #F0B90B;
-      color: #000;
     }
   </style>
 </head>
@@ -311,7 +295,7 @@
     <div class="home-content" id="homeContent">
       <div class="slideshow-placeholder">
         CTTP Trading Insights
-      </ </div>
+      </div>
       <div class="withdrawals-header">Recent Withdrawals</div>
       <div class="withdrawals-section" id="withdrawalsSection"></div>
     </div>
@@ -373,9 +357,10 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <script>
-    let currentCoinSymbol = 'BTC';
+    let currentCoinSymbol = 'BTCUSDT';
     let provider, signer, userAddress, currentChainId;
 
+    // DOM Elements
     const initScreen = document.getElementById('initScreen');
     const homeContent = document.getElementById('homeContent');
     const marketScreen = document.getElementById('marketScreen');
@@ -388,7 +373,11 @@
     const connectBtn = document.getElementById('connectBtn');
     const homeTab = document.getElementById('homeTab');
     const marketTab = document.getElementById('marketTab');
+    const tradeTab = document.getElementById('tradeTab');
+    const transactionsTab = document.getElementById('transactionsTab');
+    const userTab = document.getElementById('userTab');
 
+    // Network config
     const networkConfig = {
       1: { icon: 'Ξ', name: 'Ethereum' },
       137: { icon: 'MATIC', name: 'Polygon' },
@@ -398,21 +387,52 @@
       10: { icon: 'ETH', name: 'Optimism' }
     };
 
-    // Coin logos mapping (Binance symbols)
-    const coinLogos = {
-      'BTC': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/7e6c5a9b-0a5f-4c0a-8e0a-5e5e5e5e5e5e.png',
-      'ETH': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
-      'BNB': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
-      'SOL': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
-      'XRP': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
-      'ADA': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
-      'DOGE': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
-      'DOT': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
-      'AVAX': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
-      'SHIB': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png'
-    };
+    // Initialize app
+    function initApp() {
+      if (localStorage.getItem('web3_user_address')) {
+        showHomepage();
+      } else {
+        initScreen.style.display = 'flex';
+      }
 
-    // Generate random withdrawals
+      // Tab navigation
+      homeTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        homeContent.style.display = 'block';
+        marketScreen.style.display = 'none';
+        chartScreen.style.display = 'none';
+        setActiveTab(homeTab);
+      });
+
+      marketTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        homeContent.style.display = 'none';
+        marketScreen.style.display = 'block';
+        chartScreen.style.display = 'none';
+        fetchMarketData();
+        setActiveTab(marketTab);
+      });
+
+      tradeTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('Trade feature coming soon!');
+      });
+
+      transactionsTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('Transactions feature coming soon!');
+      });
+
+      userTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('User profile feature coming soon!');
+      });
+
+      connectBtn.addEventListener('click', connectWallet);
+      setupNetworkSwitcher();
+    }
+
+    // Generate withdrawals
     function generateWithdrawals() {
       const names = ['Alex', 'Sam', 'Taylor', 'Jordan', 'Casey'];
       const amounts = [1240, 890, 2100, 560, 1750];
@@ -430,7 +450,7 @@
       }
     }
 
-    // Fetch market data with real logos
+    // Fetch market data
     async function fetchMarketData() {
       try {
         const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h&image=true');
@@ -445,8 +465,11 @@
           const volume = coin.total_volume;
           const volumeText = volume >= 1e9 ? '$' + (volume / 1e9).toFixed(2) + 'B' : '$' + (volume / 1e6).toFixed(2) + 'M';
           
-          // Get logo (use CoinGecko image or fallback)
-          const logo = coin.image || coinLogos[coin.symbol.toUpperCase()] || 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png';
+          // Convert symbol to Binance format (e.g., BTC -> BTCUSDT)
+          const binanceSymbol = coin.symbol.toUpperCase() + 'USDT';
+          
+          // Use CoinGecko image or fallback
+          const logo = coin.image || 'https://bin.bnbstatic.com/static/images/common/empty-token.png';
           
           const row = document.createElement('div');
           row.className = 'market-row';
@@ -462,11 +485,12 @@
             <div class="change-col ${changeClass}">${changeText}</div>
             <div class="volume-col">${volumeText}</div>
           `;
-          row.onclick = () => showChart(coin.symbol.toUpperCase(), coin.name);
+          row.onclick = () => showChart(binanceSymbol, coin.name);
           list.appendChild(row);
         });
       } catch (e) {
-        console.error(e);
+        console.error('Market data fetch failed:', e);
+        document.getElementById('marketList').innerHTML = '<div style="padding:20px; color:#F6465D;">Failed to load market data</div>';
       }
     }
 
@@ -479,15 +503,15 @@
       loadBinanceChart(symbol);
     }
 
-    // Load Binance TradingView widget
+    // Load Binance widget
     function loadBinanceChart(symbol) {
-      binanceWidget.innerHTML = '';
-      
-      const widget = document.createElement('iframe');
-      widget.src = `https://www.binance.com/en/trade/${symbol}_USDT?theme=dark&type=spot`;
-      widget.style = 'width:100%; height:100%; border:none;';
-      widget.allow = 'fullscreen';
-      binanceWidget.appendChild(widget);
+      binanceWidget.innerHTML = `
+        <iframe 
+          src="https://www.binance.com/en/trade/${symbol}?theme=dark&type=spot" 
+          style="width:100%; height:100%; border:none;" 
+          allowfullscreen>
+        </iframe>
+      `;
     }
 
     function backToMarket() {
@@ -495,63 +519,45 @@
       marketScreen.style.display = 'block';
     }
 
-    // Tab navigation
-    homeTab.addEventListener('click', (e) => {
-      e.preventDefault();
-      homeContent.style.display = 'block';
-      marketScreen.style.display = 'none';
-      chartScreen.style.display = 'none';
-      setActiveTab(homeTab);
-    });
-
-    marketTab.addEventListener('click', (e) => {
-      e.preventDefault();
-      homeContent.style.display = 'none';
-      marketScreen.style.display = 'block';
-      chartScreen.style.display = 'none';
-      fetchMarketData();
-      setActiveTab(marketTab);
-    });
-
     function setActiveTab(activeTab) {
-      homeTab.classList.remove('active');
-      marketTab.classList.remove('active');
-      document.getElementById('tradeTab').classList.remove('active');
-      document.getElementById('transactionsTab').classList.remove('active');
-      document.getElementById('userTab').classList.remove('active');
+      [homeTab, marketTab, tradeTab, transactionsTab, userTab].forEach(tab => {
+        tab.classList.remove('active');
+      });
       activeTab.classList.add('active');
     }
 
-    // Network switching
-    networkIndicator.addEventListener('click', () => {
-      networkList.style.display = 'block';
-    });
+    // Network switcher
+    function setupNetworkSwitcher() {
+      networkIndicator.addEventListener('click', () => {
+        networkList.style.display = 'block';
+      });
 
-    document.addEventListener('click', (e) => {
-      if (!networkIndicator.contains(e.target) && !networkList.contains(e.target)) {
-        networkList.style.display = 'none';
-      }
-    });
-
-    networkList.addEventListener('click', async (e) => {
-      if (e.target.classList.contains('network-item')) {
-        const chainId = e.target.dataset.chain;
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x' + parseInt(chainId).toString(16) }]
-          });
-          const network = await new ethers.providers.Web3Provider(window.ethereum).getNetwork();
-          currentChainId = Number(network.chainId);
-          const config = networkConfig[currentChainId] || networkConfig[1];
-          document.querySelector('.network-icon').textContent = config.icon;
-          document.querySelector('.network-indicator span:last-child').textContent = config.name;
+      document.addEventListener('click', (e) => {
+        if (!networkIndicator.contains(e.target) && !networkList.contains(e.target)) {
           networkList.style.display = 'none';
-        } catch (err) {
-          alert('Failed to switch network');
         }
-      }
-    });
+      });
+
+      networkList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('network-item')) {
+          const chainId = e.target.dataset.chain;
+          try {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: '0x' + parseInt(chainId).toString(16) }]
+            });
+            const network = await new ethers.providers.Web3Provider(window.ethereum).getNetwork();
+            currentChainId = Number(network.chainId);
+            const config = networkConfig[currentChainId] || networkConfig[1];
+            document.querySelector('.network-icon').textContent = config.icon;
+            document.querySelector('.network-indicator span:last-child').textContent = config.name;
+            networkList.style.display = 'none';
+          } catch (err) {
+            alert('Failed to switch network');
+          }
+        }
+      });
+    }
 
     // Wallet connection
     async function connectWallet() {
@@ -578,18 +584,12 @@
       generateWithdrawals();
     }
 
-    connectBtn.addEventListener('click', connectWallet);
-
-    // Auto-connect
-    if (localStorage.getItem('web3_user_address')) {
-      showHomepage();
-    } else {
-      initScreen.style.display = 'flex';
-    }
-
     function openSupport() {
       alert('support@cttp.finance');
     }
+
+    // Start the app
+    initApp();
   </script>
 </body>
 </html>

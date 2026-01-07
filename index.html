@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -218,17 +217,11 @@
       align-items: center;
       gap: 12px;
     }
-    .coin-icon {
+    .coin-logo {
       width: 28px;
       height: 28px;
       border-radius: 50%;
       background: #2A2E39;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 12px;
-      color: #F0B90B;
     }
     .price-col, .change-col, .volume-col {
       text-align: right;
@@ -254,11 +247,11 @@
       cursor: pointer;
       margin-right: 12px;
     }
-    #chartContainer {
-      height: 250px;
-      background: #161A24;
+    #binanceWidget {
+      width: 100%;
+      height: 300px;
       border-radius: 12px;
-      margin: 12px 0;
+      overflow: hidden;
     }
     .timeframes {
       display: flex;
@@ -318,7 +311,7 @@
     <div class="home-content" id="homeContent">
       <div class="slideshow-placeholder">
         CTTP Trading Insights
-      </div>
+      </ </div>
       <div class="withdrawals-header">Recent Withdrawals</div>
       <div class="withdrawals-section" id="withdrawalsSection"></div>
     </div>
@@ -340,13 +333,7 @@
         <button class="back-btn" onclick="backToMarket()">← Back</button>
         <h2 id="chartTitle" style="font-size:18px; margin:0;">Market</h2>
       </div>
-      <div id="chartContainer"></div>
-      <div class="timeframes">
-        <button class="tf-btn active" data-tf="15">15m</button>
-        <button class="tf-btn" data-tf="60">1h</button>
-        <button class="tf-btn" data-tf="240">4h</button>
-        <button class="tf-btn" data-tf="1440">1D</button>
-      </div>
+      <div id="binanceWidget"></div>
     </div>
   </div>
 
@@ -386,15 +373,14 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <script>
-    let chart = null;
-    let currentCoin = null;
-    let currentTf = '15';
+    let currentCoinSymbol = 'BTC';
     let provider, signer, userAddress, currentChainId;
 
     const initScreen = document.getElementById('initScreen');
     const homeContent = document.getElementById('homeContent');
     const marketScreen = document.getElementById('marketScreen');
     const chartScreen = document.getElementById('chartScreen');
+    const binanceWidget = document.getElementById('binanceWidget');
     const bottomNav = document.getElementById('bottomNav');
     const customerService = document.getElementById('customerService');
     const networkIndicator = document.getElementById('networkIndicator');
@@ -402,9 +388,6 @@
     const connectBtn = document.getElementById('connectBtn');
     const homeTab = document.getElementById('homeTab');
     const marketTab = document.getElementById('marketTab');
-    const tradeTab = document.getElementById('tradeTab');
-    const transactionsTab = document.getElementById('transactionsTab');
-    const userTab = document.getElementById('userTab');
 
     const networkConfig = {
       1: { icon: 'Ξ', name: 'Ethereum' },
@@ -415,10 +398,24 @@
       10: { icon: 'ETH', name: 'Optimism' }
     };
 
+    // Coin logos mapping (Binance symbols)
+    const coinLogos = {
+      'BTC': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/7e6c5a9b-0a5f-4c0a-8e0a-5e5e5e5e5e5e.png',
+      'ETH': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
+      'BNB': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
+      'SOL': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
+      'XRP': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
+      'ADA': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
+      'DOGE': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
+      'DOT': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
+      'AVAX': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png',
+      'SHIB': 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png'
+    };
+
     // Generate random withdrawals
     function generateWithdrawals() {
-      const names = ['Alex', 'Sam', 'Taylor', 'Jordan', 'Casey', 'Riley', 'Morgan'];
-      const amounts = [1240, 890, 2100, 560, 1750, 320, 940];
+      const names = ['Alex', 'Sam', 'Taylor', 'Jordan', 'Casey'];
+      const amounts = [1240, 890, 2100, 560, 1750];
       const section = document.getElementById('withdrawalsSection');
       section.innerHTML = '';
       
@@ -433,10 +430,10 @@
       }
     }
 
-    // Fetch full market data (100+ coins)
+    // Fetch market data with real logos
     async function fetchMarketData() {
       try {
-        const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h');
+        const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h&image=true');
         const data = await res.json();
         const list = document.getElementById('marketList');
         list.innerHTML = '';
@@ -448,11 +445,14 @@
           const volume = coin.total_volume;
           const volumeText = volume >= 1e9 ? '$' + (volume / 1e9).toFixed(2) + 'B' : '$' + (volume / 1e6).toFixed(2) + 'M';
           
+          // Get logo (use CoinGecko image or fallback)
+          const logo = coin.image || coinLogos[coin.symbol.toUpperCase()] || 'https://bin.bnbstatic.com/image/admin_mgs_image_upload/20201203/5e5e5e5e-5e5e-5e5e-5e5e-5e5e5e5e5e5e.png';
+          
           const row = document.createElement('div');
           row.className = 'market-row';
           row.innerHTML = `
             <div class="coin-info">
-              <div class="coin-icon">${coin.symbol.substring(0,2).toUpperCase()}</div>
+              <img class="coin-logo" src="${logo}" onerror="this.src='https://bin.bnbstatic.com/static/images/common/empty-token.png'">
               <div>
                 <div style="font-weight:600;">${coin.symbol.toUpperCase()}</div>
                 <div style="color:#6C7284; font-size:12px;">${coin.name}</div>
@@ -462,7 +462,7 @@
             <div class="change-col ${changeClass}">${changeText}</div>
             <div class="volume-col">${volumeText}</div>
           `;
-          row.onclick = () => showChart(coin.id, coin.name, coin.symbol);
+          row.onclick = () => showChart(coin.symbol.toUpperCase(), coin.name);
           list.appendChild(row);
         });
       } catch (e) {
@@ -470,90 +470,30 @@
       }
     }
 
-    // Show chart
-    function showChart(coinId, name, symbol) {
+    // Show Binance chart
+    function showChart(symbol, name) {
+      currentCoinSymbol = symbol;
       marketScreen.style.display = 'none';
       chartScreen.style.display = 'block';
-      document.getElementById('chartTitle').textContent = `${name} (${symbol.toUpperCase()})`;
-      loadChart(coinId);
+      document.getElementById('chartTitle').textContent = `${name} (${symbol})`;
+      loadBinanceChart(symbol);
     }
 
-    // Load chart
-    async function loadChart(coinId) {
-      currentCoin = coinId;
+    // Load Binance TradingView widget
+    function loadBinanceChart(symbol) {
+      binanceWidget.innerHTML = '';
       
-      if (!window.LightweightCharts) {
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js';
-        document.head.appendChild(script);
-        script.onload = createChart;
-      } else {
-        createChart();
-      }
-    }
-
-    function createChart() {
-      const container = document.getElementById('chartContainer');
-      container.innerHTML = '';
-      
-      chart = window.LightweightCharts.createChart(container, {
-        width: container.clientWidth,
-        height: 250,
-        layout: { backgroundColor: '#161A24', textColor: '#EAECEF' },
-        grid: { vertLines: { color: '#2a2f3a' }, horzLines: { color: '#2a2f3a' } },
-        crosshair: { mode: 0 },
-        priceScale: { borderColor: '#2a2f3a' },
-        timeScale: { borderColor: '#2a2f3a', timeVisible: true }
-      });
-      
-      const candleSeries = chart.addCandlestickSeries({
-        upColor: '#4ECB71',
-        downColor: '#F6465D',
-        borderVisible: false,
-        wickUpColor: '#4ECB71',
-        wickDownColor: '#F6465D',
-      });
-      
-      fetchChartData(currentCoin, currentTf, candleSeries);
-    }
-
-    async function fetchChartData(coinId, tf, series) {
-      const daysMap = { '15': '1', '60': '1', '240': '7', '1440': '30' };
-      const days = daysMap[tf] || '1';
-      
-      try {
-        const res = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${days}`);
-        const data = await res.json();
-        
-        const formatted = data.map(d => ({
-          time: Math.floor(d[0] / 1000),
-          open: d[1],
-          high: d[2],
-          low: d[3],
-          close: d[4]
-        }));
-        
-        series.setData(formatted);
-        chart.timeScale().fitContent();
-      } catch (e) {
-        console.error(e);
-      }
+      const widget = document.createElement('iframe');
+      widget.src = `https://www.binance.com/en/trade/${symbol}_USDT?theme=dark&type=spot`;
+      widget.style = 'width:100%; height:100%; border:none;';
+      widget.allow = 'fullscreen';
+      binanceWidget.appendChild(widget);
     }
 
     function backToMarket() {
       chartScreen.style.display = 'none';
       marketScreen.style.display = 'block';
     }
-
-    // Timeframe buttons
-    document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('tf-btn')) {
-        document.querySelectorAll('.tf-btn').forEach(btn => btn.classList.remove('active'));
-        e.target.classList.add('active');
-        currentTf = e.target.dataset.tf;
-        if (chart) fetchChartData(currentCoin, currentTf, chart.series[0]);
-      }
-    });
 
     // Tab navigation
     homeTab.addEventListener('click', (e) => {
@@ -573,27 +513,12 @@
       setActiveTab(marketTab);
     });
 
-    tradeTab.addEventListener('click', (e) => {
-      e.preventDefault();
-      alert('Trade feature coming soon!');
-    });
-
-    transactionsTab.addEventListener('click', (e) => {
-      e.preventDefault();
-      alert('Transactions feature coming soon!');
-    });
-
-    userTab.addEventListener('click', (e) => {
-      e.preventDefault();
-      alert('User profile feature coming soon!');
-    });
-
     function setActiveTab(activeTab) {
       homeTab.classList.remove('active');
       marketTab.classList.remove('active');
-      tradeTab.classList.remove('active');
-      transactionsTab.classList.remove('active');
-      userTab.classList.remove('active');
+      document.getElementById('tradeTab').classList.remove('active');
+      document.getElementById('transactionsTab').classList.remove('active');
+      document.getElementById('userTab').classList.remove('active');
       activeTab.classList.add('active');
     }
 
@@ -616,7 +541,6 @@
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: '0x' + parseInt(chainId).toString(16) }]
           });
-          // Re-initialize provider
           const network = await new ethers.providers.Web3Provider(window.ethereum).getNetwork();
           currentChainId = Number(network.chainId);
           const config = networkConfig[currentChainId] || networkConfig[1];
@@ -658,8 +582,6 @@
 
     // Auto-connect
     if (localStorage.getItem('web3_user_address')) {
-      const accounts = localStorage.getItem('web3_user_address');
-      userAddress = accounts;
       showHomepage();
     } else {
       initScreen.style.display = 'flex';

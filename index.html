@@ -247,7 +247,7 @@
       cursor: pointer;
       margin-right: 12px;
     }
-    #binanceWidget {
+    #tradingview-widget {
       width: 100%;
       height: 300px;
       border-radius: 12px;
@@ -317,7 +317,7 @@
         <button class="back-btn" onclick="backToMarket()">← Back</button>
         <h2 id="chartTitle" style="font-size:18px; margin:0;">Market</h2>
       </div>
-      <div id="binanceWidget"></div>
+      <div id="tradingview-widget"></div>
     </div>
   </div>
 
@@ -357,7 +357,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <script>
-    let currentCoinSymbol = 'BTCUSDT';
+    let currentSymbol = 'BINANCE:BTCUSDT';
     let provider, signer, userAddress, currentChainId;
 
     // DOM Elements
@@ -365,7 +365,7 @@
     const homeContent = document.getElementById('homeContent');
     const marketScreen = document.getElementById('marketScreen');
     const chartScreen = document.getElementById('chartScreen');
-    const binanceWidget = document.getElementById('binanceWidget');
+    const tradingViewWidget = document.getElementById('tradingview-widget');
     const bottomNav = document.getElementById('bottomNav');
     const customerService = document.getElementById('customerService');
     const networkIndicator = document.getElementById('networkIndicator');
@@ -376,6 +376,20 @@
     const tradeTab = document.getElementById('tradeTab');
     const transactionsTab = document.getElementById('transactionsTab');
     const userTab = document.getElementById('userTab');
+
+    // TradingView symbol mapping
+    const symbolMap = {
+      'BTC': 'BINANCE:BTCUSDT',
+      'ETH': 'BINANCE:ETHUSDT',
+      'BNB': 'BINANCE:BNBUSDT',
+      'SOL': 'BINANCE:SOLUSDT',
+      'XRP': 'BINANCE:XRPUSDT',
+      'ADA': 'BINANCE:ADAUSDT',
+      'DOGE': 'BINANCE:DOGEUSDT',
+      'DOT': 'BINANCE:DOTUSDT',
+      'AVAX': 'BINANCE:AVAXUSDT',
+      'SHIB': 'BINANCE:SHIBUSDT'
+    };
 
     // Network config
     const networkConfig = {
@@ -411,21 +425,6 @@
         chartScreen.style.display = 'none';
         fetchMarketData();
         setActiveTab(marketTab);
-      });
-
-      tradeTab.addEventListener('click', (e) => {
-        e.preventDefault();
-        alert('Trade feature coming soon!');
-      });
-
-      transactionsTab.addEventListener('click', (e) => {
-        e.preventDefault();
-        alert('Transactions feature coming soon!');
-      });
-
-      userTab.addEventListener('click', (e) => {
-        e.preventDefault();
-        alert('User profile feature coming soon!');
       });
 
       connectBtn.addEventListener('click', connectWallet);
@@ -465,8 +464,8 @@
           const volume = coin.total_volume;
           const volumeText = volume >= 1e9 ? '$' + (volume / 1e9).toFixed(2) + 'B' : '$' + (volume / 1e6).toFixed(2) + 'M';
           
-          // Convert symbol to Binance format (e.g., BTC -> BTCUSDT)
-          const binanceSymbol = coin.symbol.toUpperCase() + 'USDT';
+          // Get TradingView symbol
+          const symbol = symbolMap[coin.symbol.toUpperCase()] || `BINANCE:${coin.symbol.toUpperCase()}USDT`;
           
           // Use CoinGecko image or fallback
           const logo = coin.image || 'https://bin.bnbstatic.com/static/images/common/empty-token.png';
@@ -485,7 +484,7 @@
             <div class="change-col ${changeClass}">${changeText}</div>
             <div class="volume-col">${volumeText}</div>
           `;
-          row.onclick = () => showChart(binanceSymbol, coin.name);
+          row.onclick = () => showChart(symbol, coin.name, coin.symbol.toUpperCase());
           list.appendChild(row);
         });
       } catch (e) {
@@ -494,24 +493,38 @@
       }
     }
 
-    // Show Binance chart
-    function showChart(symbol, name) {
-      currentCoinSymbol = symbol;
+    // Show TradingView chart
+    function showChart(symbol, name, ticker) {
+      currentSymbol = symbol;
       marketScreen.style.display = 'none';
       chartScreen.style.display = 'block';
-      document.getElementById('chartTitle').textContent = `${name} (${symbol})`;
-      loadBinanceChart(symbol);
+      document.getElementById('chartTitle').textContent = `${name} (${ticker})`;
+      loadTradingViewChart(symbol);
     }
 
-    // Load Binance widget
-    function loadBinanceChart(symbol) {
-      binanceWidget.innerHTML = `
-        <iframe 
-          src="https://www.binance.com/en/trade/${symbol}?theme=dark&type=spot" 
-          style="width:100%; height:100%; border:none;" 
-          allowfullscreen>
-        </iframe>
-      `;
+    // Load TradingView widget
+    function loadTradingViewChart(symbol) {
+      tradingViewWidget.innerHTML = '';
+      
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+      script.async = true;
+      script.innerHTML = JSON.stringify({
+        "autosize": true,
+        "symbol": symbol,
+        "interval": "D",
+        "timezone": "Etc/UTC",
+        "theme": "dark",
+        "style": "1",
+        "locale": "en",
+        "enable_publishing": false,
+        "allow_symbol_change": true,
+        "calendar": false,
+        "support_host": "https://www.tradingview.com"
+      });
+      
+      tradingViewWidget.appendChild(script);
     }
 
     function backToMarket() {

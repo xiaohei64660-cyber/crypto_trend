@@ -55,6 +55,7 @@
       align-items: center;
       justify-content: center;
       z-index: 10;
+      cursor: pointer;
     }
     .customer-service svg {
       width: 24px;
@@ -119,7 +120,7 @@
       color: #000;
       box-shadow: 0 4px 6px rgba(240, 185, 11, 0.3);
     }
-    .home-content, .market-screen, .chart-screen {
+    .home-content, .market-screen, .chart-screen, .support-screen {
       display: none;
       padding: 0 16px;
       margin-top: 70px;
@@ -255,7 +256,6 @@
       background: #161A24;
       position: relative;
     }
-    /* Hide TradingView logo */
     #tradingview-widget iframe {
       width: 100% !important;
       height: 100% !important;
@@ -303,6 +303,86 @@
       color: #6C7284;
       font-size: 12px;
     }
+    
+    /* Support Screen */
+    .support-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .support-header h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    .support-header p {
+      color: #6C7284;
+      font-size: 14px;
+    }
+    .chat-container {
+      height: 300px;
+      background: #161A24;
+      border-radius: 12px;
+      padding: 16px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+    .message {
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      max-width: 80%;
+      word-break: break-word;
+    }
+    .user-message {
+      background: #F0B90B;
+      color: #000;
+      align-self: flex-end;
+    }
+    .support-message {
+      background: #2A2E39;
+      color: #EAECEF;
+      align-self: flex-start;
+    }
+    .input-area {
+      display: flex;
+      gap: 8px;
+    }
+    .message-input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #2a2f3a;
+      border-radius: 8px;
+      background: #161A24;
+      color: #EAECEF;
+    }
+    .send-btn {
+      padding: 12px 20px;
+      background: #F0B90B;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .quick-btn {
+      padding: 12px;
+      background: #161A24;
+      border: 1px solid #2a2f3a;
+      border-radius: 8px;
+      color: #EAECEF;
+      text-align: center;
+      cursor: pointer;
+    }
+    .quick-btn:hover {
+      background: #1B1F2B;
+    }
   </style>
 </head>
 <body>
@@ -323,7 +403,7 @@
   </div>
 
   <!-- Customer Service -->
-  <div class="customer-service" onclick="openSupport()" id="customerService">
+  <div class="customer-service" id="customerService">
     <svg viewBox="0 0 24 24">
       <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
       <circle cx="9" cy="10" r="1"/>
@@ -368,7 +448,6 @@
       </div>
       <div id="tradingview-widget"></div>
       
-      <!-- Timeframes -->
       <div class="timeframes">
         <button class="tf-btn active" data-interval="1D">1D</button>
         <button class="tf-btn" data-interval="1W">1W</button>
@@ -377,9 +456,29 @@
         <button class="tf-btn" data-interval="12M">1Y</button>
       </div>
       
-      <!-- Live News -->
       <div class="news-header">Crypto Market News</div>
       <div id="newsContainer"></div>
+    </div>
+
+    <!-- Support Screen -->
+    <div class="support-screen" id="supportScreen">
+      <div class="support-header">
+        <h2>Customer Support</h2>
+        <p>Live chat with our support team</p>
+      </div>
+      <div class="chat-container" id="chatContainer">
+        <!-- Messages will appear here -->
+      </div>
+      <div class="input-area">
+        <input type="text" class="message-input" id="messageInput" placeholder="Type your message...">
+        <button class="send-btn" id="sendBtn">Send</button>
+      </div>
+      <div class="quick-actions">
+        <div class="quick-btn" data-action="deposit">Deposit Issue</div>
+        <div class="quick-btn" data-action="withdraw">Withdrawal Problem</div>
+        <div class="quick-btn" data-action="trade">Trading Error</div>
+        <div class="quick-btn" data-action="other">Other Questions</div>
+      </div>
     </div>
   </div>
 
@@ -422,21 +521,29 @@
     let currentSymbol = 'BINANCE:BTCUSDT';
     let currentInterval = '1D';
     let provider, signer, userAddress, currentChainId;
+    let chatMessages = [];
 
     // DOM Elements
     const initScreen = document.getElementById('initScreen');
     const homeContent = document.getElementById('homeContent');
     const marketScreen = document.getElementById('marketScreen');
     const chartScreen = document.getElementById('chartScreen');
+    const supportScreen = document.getElementById('supportScreen');
     const tradingViewWidget = document.getElementById('tradingview-widget');
     const newsContainer = document.getElementById('newsContainer');
-    const bottomNav = document.getElementById('bottomNav');
+    const chatContainer = document.getElementById('chatContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
     const customerService = document.getElementById('customerService');
+    const bottomNav = document.getElementById('bottomNav');
     const networkIndicator = document.getElementById('networkIndicator');
     const networkList = document.getElementById('networkList');
     const connectBtn = document.getElementById('connectBtn');
     const homeTab = document.getElementById('homeTab');
     const marketTab = document.getElementById('marketTab');
+    const tradeTab = document.getElementById('tradeTab');
+    const transactionsTab = document.getElementById('transactionsTab');
+    const userTab = document.getElementById('userTab');
 
     // TradingView symbol mapping
     const symbolMap = {
@@ -473,23 +580,57 @@
       // Tab navigation
       homeTab.addEventListener('click', (e) => {
         e.preventDefault();
-        homeContent.style.display = 'block';
-        marketScreen.style.display = 'none';
-        chartScreen.style.display = 'none';
-        setActiveTab(homeTab);
+        showScreen('home');
       });
 
       marketTab.addEventListener('click', (e) => {
         e.preventDefault();
-        homeContent.style.display = 'none';
-        marketScreen.style.display = 'block';
-        chartScreen.style.display = 'none';
+        showScreen('market');
         fetchMarketData();
-        setActiveTab(marketTab);
+      });
+
+      userTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        showScreen('support');
+        loadChatHistory();
+      });
+
+      customerService.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showScreen('support');
+        loadChatHistory();
       });
 
       connectBtn.addEventListener('click', connectWallet);
       setupNetworkSwitcher();
+      setupChat();
+    }
+
+    // Show screen
+    function showScreen(screen) {
+      homeContent.style.display = 'none';
+      marketScreen.style.display = 'none';
+      chartScreen.style.display = 'none';
+      supportScreen.style.display = 'none';
+      
+      if (screen === 'home') {
+        homeContent.style.display = 'block';
+        setActiveTab(homeTab);
+      } else if (screen === 'market') {
+        marketScreen.style.display = 'block';
+        setActiveTab(marketTab);
+      } else if (screen === 'chart') {
+        chartScreen.style.display = 'block';
+      } else if (screen === 'support') {
+        supportScreen.style.display = 'block';
+        setActiveTab(userTab);
+      }
+      
+      if (screen !== 'init') {
+        bottomNav.style.display = 'flex';
+        customerService.style.display = 'flex';
+        networkIndicator.style.display = 'flex';
+      }
     }
 
     // Generate withdrawals
@@ -554,8 +695,7 @@
     // Show TradingView chart
     function showChart(symbol, name, ticker) {
       currentSymbol = symbol;
-      marketScreen.style.display = 'none';
-      chartScreen.style.display = 'block';
+      showScreen('chart');
       document.getElementById('chartTitle').textContent = `${name} (${ticker})`;
       loadTradingViewChart(symbol, currentInterval);
       fetchCryptoNews();
@@ -591,17 +731,14 @@
       // Hide TradingView logo after 2 seconds
       setTimeout(() => {
         const iframe = tradingViewWidget.querySelector('iframe');
-        if (iframe) {
+        if (iframe && iframe.contentDocument) {
           const style = document.createElement('style');
           style.textContent = `
-            .tv-logo {
-              display: none !important;
-            }
-            .tv-header-logo {
+            .tv-logo, .tv-header-logo {
               display: none !important;
             }
           `;
-          iframe.contentDocument?.head.appendChild(style);
+          iframe.contentDocument.head.appendChild(style);
         }
       }, 2000);
     }
@@ -640,12 +777,11 @@
     });
 
     function backToMarket() {
-      chartScreen.style.display = 'none';
-      marketScreen.style.display = 'block';
+      showScreen('market');
     }
 
     function setActiveTab(activeTab) {
-      [homeTab, marketTab].forEach(tab => {
+      [homeTab, marketTab, tradeTab, transactionsTab, userTab].forEach(tab => {
         tab.classList.remove('active');
       });
       activeTab.classList.add('active');
@@ -702,15 +838,79 @@
 
     function showHomepage() {
       initScreen.style.display = 'none';
-      homeContent.style.display = 'block';
-      bottomNav.style.display = 'flex';
-      customerService.style.display = 'flex';
-      networkIndicator.style.display = 'flex';
+      showScreen('home');
       generateWithdrawals();
     }
 
-    function openSupport() {
-      alert('support@cttp.finance');
+    // Chat functionality
+    function setupChat() {
+      sendBtn.addEventListener('click', sendMessage);
+      messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+      });
+
+      // Quick action buttons
+      document.querySelectorAll('.quick-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          let message = '';
+          switch(action) {
+            case 'deposit': message = 'I have an issue with my deposit'; break;
+            case 'withdraw': message = 'My withdrawal is not processing'; break;
+            case 'trade': message = 'I encountered an error while trading'; break;
+            case 'other': message = 'I have a general question'; break;
+          }
+          messageInput.value = message;
+          sendMessage();
+        });
+      });
+    }
+
+    function sendMessage() {
+      const message = messageInput.value.trim();
+      if (!message) return;
+      
+      // Add user message
+      addMessage(message, 'user');
+      messageInput.value = '';
+      
+      // Simulate support response after 1-2 seconds
+      setTimeout(() => {
+        const responses = [
+          "Thanks for your message! Our team will assist you shortly.",
+          "We've received your query and will respond within 24 hours.",
+          "Your support ticket has been created. Reference: #" + Math.floor(Math.random() * 10000),
+          "Our agents are currently busy. We'll get back to you ASAP!"
+        ];
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        addMessage(randomResponse, 'support');
+      }, 1000 + Math.random() * 1000);
+    }
+
+    function addMessage(text, sender) {
+      const messageEl = document.createElement('div');
+      messageEl.className = `message ${sender}-message`;
+      messageEl.textContent = text;
+      chatContainer.appendChild(messageEl);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      
+      // Save to localStorage
+      chatMessages.push({ text, sender, timestamp: Date.now() });
+      localStorage.setItem('cttp_chat_history', JSON.stringify(chatMessages));
+    }
+
+    function loadChatHistory() {
+      const saved = localStorage.getItem('cttp_chat_history');
+      if (saved) {
+        chatMessages = JSON.parse(saved);
+        chatContainer.innerHTML = '';
+        chatMessages.forEach(msg => {
+          addMessage(msg.text, msg.sender);
+        });
+      } else {
+        // Welcome message
+        addMessage("Hello! 👋 How can we help you today?", 'support');
+      }
     }
 
     // Start the app

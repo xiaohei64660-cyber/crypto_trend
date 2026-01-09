@@ -253,6 +253,55 @@
       border-radius: 12px;
       overflow: hidden;
       background: #161A24;
+      position: relative;
+    }
+    /* Hide TradingView logo */
+    #tradingview-widget iframe {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .timeframes {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+    .tf-btn {
+      padding: 6px 12px;
+      border: 1px solid #2a2f3a;
+      background: #161A24;
+      color: #EAECEF;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .tf-btn.active {
+      background: #F0B90B;
+      color: #000;
+    }
+    
+    /* News Section */
+    .news-header {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 20px 0 12px;
+      color: white;
+    }
+    .news-item {
+      background: #161A24;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .news-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #F0B90B;
+    }
+    .news-source {
+      color: #6C7284;
+      font-size: 12px;
     }
   </style>
 </head>
@@ -318,6 +367,19 @@
         <h2 id="chartTitle" style="font-size:18px; margin:0;">Market</h2>
       </div>
       <div id="tradingview-widget"></div>
+      
+      <!-- Timeframes -->
+      <div class="timeframes">
+        <button class="tf-btn active" data-interval="1D">1D</button>
+        <button class="tf-btn" data-interval="1W">1W</button>
+        <button class="tf-btn" data-interval="1M">1M</button>
+        <button class="tf-btn" data-interval="3M">3M</button>
+        <button class="tf-btn" data-interval="12M">1Y</button>
+      </div>
+      
+      <!-- Live News -->
+      <div class="news-header">Crypto Market News</div>
+      <div id="newsContainer"></div>
     </div>
   </div>
 
@@ -358,6 +420,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <script>
     let currentSymbol = 'BINANCE:BTCUSDT';
+    let currentInterval = '1D';
     let provider, signer, userAddress, currentChainId;
 
     // DOM Elements
@@ -366,6 +429,7 @@
     const marketScreen = document.getElementById('marketScreen');
     const chartScreen = document.getElementById('chartScreen');
     const tradingViewWidget = document.getElementById('tradingview-widget');
+    const newsContainer = document.getElementById('newsContainer');
     const bottomNav = document.getElementById('bottomNav');
     const customerService = document.getElementById('customerService');
     const networkIndicator = document.getElementById('networkIndicator');
@@ -373,9 +437,6 @@
     const connectBtn = document.getElementById('connectBtn');
     const homeTab = document.getElementById('homeTab');
     const marketTab = document.getElementById('marketTab');
-    const tradeTab = document.getElementById('tradeTab');
-    const transactionsTab = document.getElementById('transactionsTab');
-    const userTab = document.getElementById('userTab');
 
     // TradingView symbol mapping
     const symbolMap = {
@@ -464,10 +525,7 @@
           const volume = coin.total_volume;
           const volumeText = volume >= 1e9 ? '$' + (volume / 1e9).toFixed(2) + 'B' : '$' + (volume / 1e6).toFixed(2) + 'M';
           
-          // Get TradingView symbol
           const symbol = symbolMap[coin.symbol.toUpperCase()] || `BINANCE:${coin.symbol.toUpperCase()}USDT`;
-          
-          // Use CoinGecko image or fallback
           const logo = coin.image || 'https://bin.bnbstatic.com/static/images/common/empty-token.png';
           
           const row = document.createElement('div');
@@ -499,11 +557,12 @@
       marketScreen.style.display = 'none';
       chartScreen.style.display = 'block';
       document.getElementById('chartTitle').textContent = `${name} (${ticker})`;
-      loadTradingViewChart(symbol);
+      loadTradingViewChart(symbol, currentInterval);
+      fetchCryptoNews();
     }
 
     // Load TradingView widget
-    function loadTradingViewChart(symbol) {
+    function loadTradingViewChart(symbol, interval) {
       tradingViewWidget.innerHTML = '';
       
       const script = document.createElement('script');
@@ -513,7 +572,7 @@
       script.innerHTML = JSON.stringify({
         "autosize": true,
         "symbol": symbol,
-        "interval": "D",
+        "interval": interval,
         "timezone": "Etc/UTC",
         "theme": "dark",
         "style": "1",
@@ -521,11 +580,64 @@
         "enable_publishing": false,
         "allow_symbol_change": true,
         "calendar": false,
-        "support_host": "https://www.tradingview.com"
+        "support_host": "https://www.tradingview.com",
+        "hide_legend": true,
+        "hide_side_toolbar": false,
+        "allow_symbol_change": true
       });
       
       tradingViewWidget.appendChild(script);
+      
+      // Hide TradingView logo after 2 seconds
+      setTimeout(() => {
+        const iframe = tradingViewWidget.querySelector('iframe');
+        if (iframe) {
+          const style = document.createElement('style');
+          style.textContent = `
+            .tv-logo {
+              display: none !important;
+            }
+            .tv-header-logo {
+              display: none !important;
+            }
+          `;
+          iframe.contentDocument?.head.appendChild(style);
+        }
+      }, 2000);
     }
+
+    // Fetch crypto news
+    async function fetchCryptoNews() {
+      try {
+        const res = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN&extraParams=CTTP');
+        const data = await res.json();
+        const container = document.getElementById('newsContainer');
+        container.innerHTML = '';
+        
+        data.Data.slice(0, 3).forEach(article => {
+          const item = document.createElement('div');
+          item.className = 'news-item';
+          item.innerHTML = `
+            <div class="news-title">${article.title}</div>
+            <div class="news-source">${new Date(article.published_on * 1000).toLocaleDateString()} • ${article.source}</div>
+          `;
+          container.appendChild(item);
+        });
+      } catch (e) {
+        console.error('News fetch failed:', e);
+        document.getElementById('newsContainer').innerHTML = '<div class="news-item">Live news loading...</div>';
+      }
+    }
+
+    // Timeframe buttons
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('tf-btn')) {
+        document.querySelectorAll('.tf-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        currentInterval = e.target.dataset.interval;
+        loadTradingViewChart(currentSymbol, currentInterval);
+      }
+    });
 
     function backToMarket() {
       chartScreen.style.display = 'none';
@@ -533,7 +645,7 @@
     }
 
     function setActiveTab(activeTab) {
-      [homeTab, marketTab, tradeTab, transactionsTab, userTab].forEach(tab => {
+      [homeTab, marketTab].forEach(tab => {
         tab.classList.remove('active');
       });
       activeTab.classList.add('active');

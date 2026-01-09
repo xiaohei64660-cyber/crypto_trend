@@ -120,7 +120,7 @@
       color: #000;
       box-shadow: 0 4px 6px rgba(240, 185, 11, 0.3);
     }
-    .home-content, .market-screen, .chart-screen, .support-screen {
+    .home-content, .market-screen, .chart-screen, .support-screen, .trade-screen {
       display: none;
       padding: 0 16px;
       margin-top: 70px;
@@ -383,6 +383,107 @@
     .quick-btn:hover {
       background: #1B1F2B;
     }
+    
+    /* Trade Screen */
+    .trade-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .trade-header h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    .current-price {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin: 16px 0;
+      color: #4ECB71;
+    }
+    .price-change {
+      text-align: center;
+      font-size: 14px;
+      color: #4ECB71;
+      margin-bottom: 24px;
+    }
+    .amount-input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #2a2f3a;
+      border-radius: 12px;
+      background: #161A24;
+      color: #EAECEF;
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+    .duration-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .duration-btn {
+      padding: 16px;
+      background: #161A24;
+      border: 1px solid #2a2f3a;
+      border-radius: 12px;
+      color: #EAECEF;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .duration-btn.active {
+      background: #F0B90B;
+      color: #000;
+      border-color: #F0B90B;
+    }
+    .profit-label {
+      font-size: 14px;
+      color: #6C7284;
+      margin-top: 4px;
+    }
+    .trade-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .trade-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .call-btn {
+      background: #4ECB71;
+      color: #000;
+    }
+    .put-btn {
+      background: #F6465D;
+      color: #fff;
+    }
+    .countdown {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin: 16px 0;
+      color: #F0B90B;
+    }
+    .result {
+      text-align: center;
+      padding: 16px;
+      border-radius: 12px;
+      margin: 16px 0;
+    }
+    .win {
+      background: rgba(78, 203, 113, 0.2);
+      color: #4ECB71;
+    }
+    .loss {
+      background: rgba(246, 70, 93, 0.2);
+      color: #F6465D;
+    }
   </style>
 </head>
 <body>
@@ -480,6 +581,41 @@
         <div class="quick-btn" data-action="other">Other Questions</div>
       </div>
     </div>
+
+    <!-- Trade Screen -->
+    <div class="trade-screen" id="tradeScreen">
+      <div class="trade-header">
+        <h2>Quick Trade</h2>
+        <p>Trade BTC/USDT with fixed profit rates</p>
+      </div>
+      <div class="current-price" id="currentPrice">$61,245.50</div>
+      <div class="price-change" id="priceChange">+0.24%</div>
+      
+      <input type="number" class="amount-input" id="amountInput" placeholder="Enter amount (min $10)" min="10" value="100">
+      
+      <div class="duration-options">
+        <div class="duration-btn active" data-seconds="30" data-profit="40">
+          30s<br><span class="profit-label">+40% Profit</span>
+        </div>
+        <div class="duration-btn" data-seconds="60" data-profit="60">
+          60s<br><span class="profit-label">+60% Profit</span>
+        </div>
+        <div class="duration-btn" data-seconds="120" data-profit="80">
+          120s<br><span class="profit-label">+80% Profit</span>
+        </div>
+        <div class="duration-btn" data-seconds="180" data-profit="100">
+          180s<br><span class="profit-label">+100% Profit</span>
+        </div>
+      </div>
+      
+      <div class="trade-actions">
+        <button class="trade-btn call-btn" id="callBtn">CALL ↑</button>
+        <button class="trade-btn put-btn" id="putBtn">PUT ↓</button>
+      </div>
+      
+      <div class="countdown" id="countdown" style="display:none;"></div>
+      <div id="resultContainer"></div>
+    </div>
   </div>
 
   <!-- Bottom Navigation -->
@@ -522,6 +658,9 @@
     let currentInterval = '1D';
     let provider, signer, userAddress, currentChainId;
     let chatMessages = [];
+    let selectedDuration = { seconds: 30, profit: 40 };
+    let priceInterval;
+    let countdownInterval;
 
     // DOM Elements
     const initScreen = document.getElementById('initScreen');
@@ -529,6 +668,7 @@
     const marketScreen = document.getElementById('marketScreen');
     const chartScreen = document.getElementById('chartScreen');
     const supportScreen = document.getElementById('supportScreen');
+    const tradeScreen = document.getElementById('tradeScreen');
     const tradingViewWidget = document.getElementById('tradingview-widget');
     const newsContainer = document.getElementById('newsContainer');
     const chatContainer = document.getElementById('chatContainer');
@@ -589,10 +729,15 @@
         fetchMarketData();
       });
 
+      tradeTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        showScreen('trade');
+        startPriceSimulation();
+      });
+
       userTab.addEventListener('click', (e) => {
         e.preventDefault();
-        showScreen('support');
-        loadChatHistory();
+        showScreen('user');
       });
 
       customerService.addEventListener('click', (e) => {
@@ -604,6 +749,7 @@
       connectBtn.addEventListener('click', connectWallet);
       setupNetworkSwitcher();
       setupChat();
+      setupTrade();
     }
 
     // Show screen
@@ -612,6 +758,7 @@
       marketScreen.style.display = 'none';
       chartScreen.style.display = 'none';
       supportScreen.style.display = 'none';
+      tradeScreen.style.display = 'none';
       
       if (screen === 'home') {
         homeContent.style.display = 'block';
@@ -623,7 +770,13 @@
         chartScreen.style.display = 'block';
       } else if (screen === 'support') {
         supportScreen.style.display = 'block';
-        setActiveTab(userTab);
+        // Do NOT set active tab - independent page
+      } else if (screen === 'trade') {
+        tradeScreen.style.display = 'block';
+        setActiveTab(tradeTab);
+      } else if (screen === 'user') {
+        alert('User profile coming soon!');
+        return;
       }
       
       if (screen !== 'init') {
@@ -912,6 +1065,120 @@
         addMessage("Hello! 👋 How can we help you today?", 'support');
       }
     }
+
+    // Trade functionality
+    function setupTrade() {
+      // Duration selection
+      document.querySelectorAll('.duration-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedDuration = {
+            seconds: parseInt(btn.dataset.seconds),
+            profit: parseInt(btn.dataset.profit)
+          };
+        });
+      });
+
+      // Trade buttons
+      document.getElementById('callBtn').addEventListener('click', () => executeTrade('call'));
+      document.getElementById('putBtn').addEventListener('click', () => executeTrade('put'));
+
+      // Initialize price
+      updatePrice(61245.50);
+    }
+
+    function startPriceSimulation() {
+      // Stop any existing simulation
+      if (priceInterval) clearInterval(priceInterval);
+      
+      let price = 61245.50;
+      priceInterval = setInterval(() => {
+        // Random price movement (-0.5% to +0.5%)
+        const change = (Math.random() - 0.5) * 0.01;
+        price *= (1 + change);
+        updatePrice(price);
+      }, 1000);
+    }
+
+    function updatePrice(price) {
+      const priceEl = document.getElementById('currentPrice');
+      const changeEl = document.getElementById('priceChange');
+      
+      priceEl.textContent = `$${price.toFixed(2)}`;
+      
+      // Calculate change from previous price
+      const prevPrice = parseFloat(priceEl.dataset.prev || price);
+      const change = ((price - prevPrice) / prevPrice) * 100;
+      priceEl.dataset.prev = price;
+      
+      changeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+      changeEl.style.color = change >= 0 ? '#4ECB71' : '#F6465D';
+    }
+
+    function executeTrade(type) {
+      const amountInput = document.getElementById('amountInput');
+      const amount = parseFloat(amountInput.value);
+      
+      if (isNaN(amount) || amount < 10) {
+        alert('Please enter a valid amount (minimum $10)');
+        return;
+      }
+      
+      // Disable buttons during trade
+      document.getElementById('callBtn').disabled = true;
+      document.getElementById('putBtn').disabled = true;
+      
+      // Show countdown
+      const countdownEl = document.getElementById('countdown');
+      countdownEl.style.display = 'block';
+      countdownEl.textContent = `Trade in progress... ${selectedDuration.seconds}s`;
+      
+      // Start countdown
+      let secondsLeft = selectedDuration.seconds;
+      countdownInterval = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft > 0) {
+          countdownEl.textContent = `Trade in progress... ${secondsLeft}s`;
+        } else {
+          clearInterval(countdownInterval);
+          finishTrade(type, amount);
+        }
+      }, 1000);
+    }
+
+    function finishTrade(type, amount) {
+      const countdownEl = document.getElementById('countdown');
+      const resultContainer = document.getElementById('resultContainer');
+      
+      countdownEl.style.display = 'none';
+      
+      // Determine win/loss (50% chance)
+      const isWin = Math.random() > 0.5;
+      const profitAmount = (amount * selectedDuration.profit) / 100;
+      const result = isWin ? 
+        `You won! +$${profitAmount.toFixed(2)} (${selectedDuration.profit}%)` :
+        `You lost! -$${amount.toFixed(2)}`;
+      
+      const resultEl = document.createElement('div');
+      resultEl.className = `result ${isWin ? 'win' : 'loss'}`;
+      resultEl.textContent = result;
+      resultContainer.innerHTML = '';
+      resultContainer.appendChild(resultEl);
+      
+      // Re-enable buttons after 3 seconds
+      setTimeout(() => {
+        document.getElementById('callBtn').disabled = false;
+        document.getElementById('putBtn').disabled = false;
+        resultContainer.innerHTML = '';
+      }, 3000);
+    }
+
+    // Cleanup on unload
+    window.addEventListener('beforeunload', () => {
+      if (priceInterval) clearInterval(priceInterval);
+      if (countdownInterval) clearInterval(countdownInterval);
+    });
 
     // Start the app
     initApp();

@@ -120,7 +120,7 @@
       color: #000;
       box-shadow: 0 4px 6px rgba(240, 185, 11, 0.3);
     }
-    .home-content, .market-screen, .chart-screen, .support-screen, .trade-screen {
+    .home-content, .market-screen, .chart-screen, .support-screen, .trade-screen, .transactions-screen {
       display: none;
       padding: 0 16px;
       margin-top: 70px;
@@ -393,6 +393,10 @@
       font-size: 22px;
       margin-bottom: 8px;
     }
+    .trade-header p {
+      color: #6C7284;
+      font-size: 14px;
+    }
     .current-price {
       font-size: 24px;
       font-weight: bold;
@@ -442,27 +446,47 @@
       color: #6C7284;
       margin-top: 4px;
     }
+    
+    /* Professional Trade Buttons */
     .trade-actions {
       display: flex;
       gap: 12px;
+      margin-top: 16px;
     }
     .trade-btn {
       flex: 1;
-      padding: 14px;
+      padding: 16px;
       border: none;
       border-radius: 12px;
-      font-weight: 600;
-      font-size: 16px;
+      font-weight: 700;
+      font-size: 18px;
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s;
+    }
+    .trade-btn:active {
+      transform: scale(0.98);
     }
     .call-btn {
-      background: #4ECB71;
-      color: #000;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
     }
     .put-btn {
-      background: #F6465D;
-      color: #fff;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
     }
+    .arrow {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+    .label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
     .countdown {
       text-align: center;
       font-size: 18px;
@@ -483,6 +507,32 @@
     .loss {
       background: rgba(246, 70, 93, 0.2);
       color: #F6465D;
+    }
+    
+    /* Transactions Screen */
+    .transaction-item {
+      background: #161A24;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    .transaction-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .transaction-amount {
+      font-weight: 600;
+    }
+    .transaction-profit {
+      font-size: 14px;
+      color: #6C7284;
+    }
+    .win-text { color: #4ECB71; }
+    .loss-text { color: #F6465D; }
+    .transaction-time {
+      font-size: 12px;
+      color: #6C7284;
     }
   </style>
 </head>
@@ -609,12 +659,26 @@
       </div>
       
       <div class="trade-actions">
-        <button class="trade-btn call-btn" id="callBtn">CALL ↑</button>
-        <button class="trade-btn put-btn" id="putBtn">PUT ↓</button>
+        <button class="trade-btn call-btn" id="callBtn">
+          <div class="arrow">↑</div>
+          <div class="label">UP</div>
+        </button>
+        <button class="trade-btn put-btn" id="putBtn">
+          <div class="arrow">↓</div>
+          <div class="label">DOWN</div>
+        </button>
       </div>
       
       <div class="countdown" id="countdown" style="display:none;"></div>
       <div id="resultContainer"></div>
+    </div>
+
+    <!-- Transactions Screen -->
+    <div class="transactions-screen" id="transactionsScreen">
+      <div class="withdrawals-header">Trading History</div>
+      <div id="transactionsList">
+        <!-- Transactions will appear here -->
+      </div>
     </div>
   </div>
 
@@ -661,6 +725,7 @@
     let selectedDuration = { seconds: 30, profit: 40 };
     let priceInterval;
     let countdownInterval;
+    let transactions = JSON.parse(localStorage.getItem('cttp_transactions')) || [];
 
     // DOM Elements
     const initScreen = document.getElementById('initScreen');
@@ -669,6 +734,7 @@
     const chartScreen = document.getElementById('chartScreen');
     const supportScreen = document.getElementById('supportScreen');
     const tradeScreen = document.getElementById('tradeScreen');
+    const transactionsScreen = document.getElementById('transactionsScreen');
     const tradingViewWidget = document.getElementById('tradingview-widget');
     const newsContainer = document.getElementById('newsContainer');
     const chatContainer = document.getElementById('chatContainer');
@@ -735,9 +801,15 @@
         startPriceSimulation();
       });
 
+      transactionsTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        showScreen('transactions');
+        renderTransactions();
+      });
+
       userTab.addEventListener('click', (e) => {
         e.preventDefault();
-        showScreen('user');
+        alert('User profile coming soon!');
       });
 
       customerService.addEventListener('click', (e) => {
@@ -759,6 +831,7 @@
       chartScreen.style.display = 'none';
       supportScreen.style.display = 'none';
       tradeScreen.style.display = 'none';
+      transactionsScreen.style.display = 'none';
       
       if (screen === 'home') {
         homeContent.style.display = 'block';
@@ -774,6 +847,9 @@
       } else if (screen === 'trade') {
         tradeScreen.style.display = 'block';
         setActiveTab(tradeTab);
+      } else if (screen === 'transactions') {
+        transactionsScreen.style.display = 'block';
+        setActiveTab(transactionsTab);
       } else if (screen === 'user') {
         alert('User profile coming soon!');
         return;
@@ -1081,8 +1157,8 @@
       });
 
       // Trade buttons
-      document.getElementById('callBtn').addEventListener('click', () => executeTrade('call'));
-      document.getElementById('putBtn').addEventListener('click', () => executeTrade('put'));
+      document.getElementById('callBtn').addEventListener('click', () => executeTrade('up'));
+      document.getElementById('putBtn').addEventListener('click', () => executeTrade('down'));
 
       // Initialize price
       updatePrice(61245.50);
@@ -1156,13 +1232,28 @@
       // Determine win/loss (50% chance)
       const isWin = Math.random() > 0.5;
       const profitAmount = (amount * selectedDuration.profit) / 100;
-      const result = isWin ? 
+      const resultAmount = isWin ? profitAmount : -amount;
+      
+      // Save transaction
+      const transaction = {
+        id: Date.now(),
+        type: type,
+        amount: amount,
+        result: resultAmount,
+        duration: selectedDuration.seconds,
+        timestamp: new Date().toISOString()
+      };
+      transactions.unshift(transaction);
+      localStorage.setItem('cttp_transactions', JSON.stringify(transactions));
+      
+      // Show result
+      const resultText = isWin ? 
         `You won! +$${profitAmount.toFixed(2)} (${selectedDuration.profit}%)` :
         `You lost! -$${amount.toFixed(2)}`;
       
       const resultEl = document.createElement('div');
       resultEl.className = `result ${isWin ? 'win' : 'loss'}`;
-      resultEl.textContent = result;
+      resultEl.textContent = resultText;
       resultContainer.innerHTML = '';
       resultContainer.appendChild(resultEl);
       
@@ -1172,6 +1263,35 @@
         document.getElementById('putBtn').disabled = false;
         resultContainer.innerHTML = '';
       }, 3000);
+    }
+
+    // Render transactions
+    function renderTransactions() {
+      const container = document.getElementById('transactionsList');
+      container.innerHTML = '';
+      
+      if (transactions.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#6C7284;">No trading history yet</div>';
+        return;
+      }
+      
+      transactions.forEach(tx => {
+        const isWin = tx.result > 0;
+        const formattedTime = new Date(tx.timestamp).toLocaleString();
+        
+        const item = document.createElement('div');
+        item.className = 'transaction-item';
+        item.innerHTML = `
+          <div class="transaction-header">
+            <div class="transaction-amount">${tx.type === 'up' ? '↑ UP' : '↓ DOWN'}</div>
+            <div class="transaction-profit ${isWin ? 'win-text' : 'loss-text'}">
+              ${isWin ? '+' : ''}$${Math.abs(tx.result).toFixed(2)}
+            </div>
+          </div>
+          <div class="transaction-time">${formattedTime}</div>
+        `;
+        container.appendChild(item);
+      });
     }
 
     // Cleanup on unload

@@ -120,7 +120,7 @@
       color: #000;
       box-shadow: 0 4px 6px rgba(240, 185, 11, 0.3);
     }
-    .home-content, .market-screen, .chart-screen, .support-screen, .trade-screen, .transactions-screen, .user-screen {
+    .home-content, .market-screen, .chart-screen, .support-screen, .trade-screen, .transactions-screen {
       display: none;
       padding: 0 16px;
       margin-top: 70px;
@@ -193,75 +193,195 @@
       fill: currentColor;
     }
     
-    /* User Screen */
-    .user-card {
-      background: #161A24;
-      padding: 20px;
-      border-radius: 16px;
-      margin-bottom: 24px;
-    }
-    .user-id {
-      font-size: 14px;
+    /* Binance-Style Market Table */
+    .market-header {
+      display: grid;
+      grid-template-columns: 3fr 2fr 2fr 2fr;
+      padding: 12px 16px;
+      font-weight: 600;
       color: #6C7284;
-      margin-bottom: 8px;
+      border-bottom: 1px solid #2a2f3a;
+      margin-top: 12px;
     }
-    .user-id-value {
-      font-weight: 600;
-      color: #F0B90B;
+    .market-row {
+      display: grid;
+      grid-template-columns: 3fr 2fr 2fr 2fr;
+      padding: 14px 16px;
+      border-bottom: 1px solid #23262F;
+      cursor: pointer;
     }
-    .credit-score {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 16px 0;
-      color: #4ECB71;
+    .market-row:hover {
+      background: #1B1F2B;
     }
-    .assets-section {
-      margin-top: 24px;
-    }
-    .assets-header {
+    .coin-info {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      gap: 12px;
     }
-    .toggle-btn {
-      background: #2A2E39;
-      border: 1px solid #2a2f3a;
-      color: #EAECEF;
+    .coin-logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .price-col, .change-col, .volume-col {
+      text-align: right;
+      font-weight: 500;
+    }
+    .positive { color: #4ECB71; }
+    .negative { color: #F6465D; }
+    
+    /* Chart Screen */
+    .chart-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 16px 12px;
+      color: white;
+    }
+    .back-btn {
+      background: #F0B90B;
+      color: #000;
+      border: none;
       padding: 6px 12px;
       border-radius: 6px;
+      font-weight: 600;
       cursor: pointer;
+      margin-right: 12px;
+    }
+    #tradingview-widget {
+      width: 100%;
+      height: 300px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #161A24;
+      position: relative;
+    }
+    #tradingview-widget iframe {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .timeframes {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+    .tf-btn {
+      padding: 6px 12px;
+      border: 1px solid #2a2f3a;
+      background: #161A24;
+      color: #EAECEF;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .tf-btn.active {
+      background: #F0B90B;
+      color: #000;
+    }
+    
+    /* News Section */
+    .news-header {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 20px 0 12px;
+      color: white;
+    }
+    .news-item {
+      background: #161A24;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
       font-size: 14px;
     }
-    .toggle-btn:hover {
-      background: #334155;
+    .news-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #F0B90B;
     }
-    .assets-list {
-      background: #2A2E39;
+    .news-source {
+      color: #6C7284;
+      font-size: 12px;
+    }
+    
+    /* Support Screen */
+    .support-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .support-header h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    .support-header p {
+      color: #6C7284;
+      font-size: 14px;
+    }
+    .chat-container {
+      height: 300px;
+      background: #161A24;
       border-radius: 12px;
       padding: 16px;
-    }
-    .asset-item {
+      overflow-y: auto;
+      margin-bottom: 16px;
       display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid #334155;
+      flex-direction: column;
     }
-    .asset-item:last-child {
-      border-bottom: none;
+    .message {
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      max-width: 80%;
+      word-break: break-word;
     }
-    .asset-name {
+    .user-message {
+      background: #F0B90B;
+      color: #000;
+      align-self: flex-end;
+    }
+    .support-message {
+      background: #2A2E39;
+      color: #EAECEF;
+      align-self: flex-start;
+    }
+    .input-area {
+      display: flex;
+      gap: 8px;
+    }
+    .message-input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #2a2f3a;
+      border-radius: 8px;
+      background: #161A24;
       color: #EAECEF;
     }
-    .asset-value {
-      color: #4ECB71;
+    .send-btn {
+      padding: 12px 20px;
+      background: #F0B90B;
+      color: #000;
+      border: none;
+      border-radius: 8px;
       font-weight: 600;
+      cursor: pointer;
     }
-    .hidden-assets {
-      color: #6C7284;
-      font-style: italic;
-      padding: 16px;
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .quick-btn {
+      padding: 12px;
+      background: #161A24;
+      border: 1px solid #2a2f3a;
+      border-radius: 8px;
+      color: #EAECEF;
       text-align: center;
+      cursor: pointer;
+    }
+    .quick-btn:hover {
+      background: #1B1F2B;
     }
     
     /* Trade Screen */
@@ -290,43 +410,6 @@
       color: #4ECB71;
       margin-bottom: 24px;
     }
-    
-    /* Pair Selection */
-    .pair-selector {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid #2a2f3a;
-      border-radius: 12px;
-      background: #161A24;
-      color: #EAECEF;
-      font-size: 16px;
-      margin-bottom: 24px;
-      cursor: pointer;
-    }
-    
-    /* Dual Input Fields */
-    .input-group {
-      margin-bottom: 24px;
-    }
-    .input-label {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-size: 14px;
-      color: #6C7284;
-    }
-    .max-btn {
-      background: #2A2E39;
-      border: 1px solid #2a2f3a;
-      color: #F0B90B;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .max-btn:hover {
-      background: #334155;
-    }
     .amount-input {
       width: 100%;
       padding: 14px;
@@ -335,8 +418,8 @@
       background: #161A24;
       color: #EAECEF;
       font-size: 16px;
+      margin-bottom: 24px;
     }
-    
     .duration-options {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -426,74 +509,30 @@
       color: #F6465D;
     }
     
-    /* Confirmation Popup */
-    .popup-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      display: none;
-    }
-    .popup-content {
+    /* Transactions Screen */
+    .transaction-item {
       background: #161A24;
-      border-radius: 16px;
-      padding: 24px;
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-    }
-    .popup-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: white;
-    }
-    .popup-detail {
-      text-align: left;
-      margin: 12px 0;
-      padding: 12px;
-      background: #2A2E39;
+      padding: 16px;
       border-radius: 12px;
+      margin-bottom: 12px;
     }
-    .popup-row {
+    .transaction-header {
       display: flex;
       justify-content: space-between;
-      margin: 8px 0;
+      margin-bottom: 8px;
     }
-    .popup-label {
+    .transaction-amount {
+      font-weight: 600;
+    }
+    .transaction-profit {
+      font-size: 14px;
       color: #6C7284;
     }
-    .popup-value {
-      color: #EAECEF;
-      font-weight: 600;
-    }
-    .popup-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-    }
-    .popup-btn {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .confirm-btn {
-      background: #F0B90B;
-      color: #000;
-    }
-    .cancel-btn {
-      background: #2A2E39;
-      color: #EAECEF;
-      border: 1px solid #2a2f3a;
+    .win-text { color: #4ECB71; }
+    .loss-text { color: #F6465D; }
+    .transaction-time {
+      font-size: 12px;
+      color: #6C7284;
     }
   </style>
 </head>
@@ -597,38 +636,12 @@
     <div class="trade-screen" id="tradeScreen">
       <div class="trade-header">
         <h2>Quick Trade</h2>
-        <p>Select pair and duration to start trading</p>
+        <p>Trade BTC/USDT with fixed profit rates</p>
       </div>
-      
-      <!-- Pair Selection -->
-      <select class="pair-selector" id="pairSelector">
-        <option value="BTC/USDT">BTC/USDT</option>
-        <option value="ETH/USDT">ETH/USDT</option>
-        <option value="BNB/USDT">BNB/USDT</option>
-        <option value="SOL/USDT">SOL/USDT</option>
-        <option value="XRP/USDT">XRP/USDT</option>
-      </select>
-      
-      <!-- Currency Input -->
-      <div class="input-group">
-        <div class="input-label">
-          <span>Currency</span>
-          <span class="max-btn" id="maxCurrencyBtn">Max</span>
-        </div>
-        <input type="text" class="amount-input" id="currencyInput" placeholder="0.00 BTC" readonly>
-      </div>
-      
-      <!-- Amount Input -->
-      <div class="input-group">
-        <div class="input-label">
-          <span>Amount (USDT)</span>
-          <span class="max-btn" id="maxAmountBtn">Max</span>
-        </div>
-        <input type="number" class="amount-input" id="amountInput" placeholder="Enter amount" min="10" value="100">
-      </div>
-      
       <div class="current-price" id="currentPrice">$61,245.50</div>
       <div class="price-change" id="priceChange">+0.24%</div>
+      
+      <input type="number" class="amount-input" id="amountInput" placeholder="Enter amount (min $10)" min="10" value="100">
       
       <div class="duration-options">
         <div class="duration-btn active" data-seconds="30" data-profit="40">
@@ -665,67 +678,6 @@
       <div class="withdrawals-header">Trading History</div>
       <div id="transactionsList">
         <!-- Transactions will appear here -->
-      </div>
-    </div>
-
-    <!-- User Screen -->
-    <div class="user-screen" id="userScreen">
-      <div class="user-card">
-        <div class="user-id">
-          User ID: <span class="user-id-value" id="userId">—</span>
-        </div>
-        <div class="credit-score">
-          Credit Score: <span id="creditScore">0</span>
-        </div>
-        
-        <div class="assets-section">
-          <div class="assets-header">
-            <div>Assets (USD)</div>
-            <button class="toggle-btn" id="toggleAssets">Hide</button>
-          </div>
-          <div class="assets-list" id="assetsList">
-            <!-- Assets will appear here -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Confirmation Popup -->
-  <div class="popup-overlay" id="confirmationPopup">
-    <div class="popup-content">
-      <div class="popup-title">Confirm Trade</div>
-      
-      <div class="popup-detail">
-        <div class="popup-row">
-          <span class="popup-label">Pair:</span>
-          <span class="popup-value" id="popupPair">BTC/USDT</span>
-        </div>
-        <div class="popup-row">
-          <span class="popup-label">Direction:</span>
-          <span class="popup-value" id="popupDirection">UP</span>
-        </div>
-        <div class="popup-row">
-          <span class="popup-label">Amount:</span>
-          <span class="popup-value" id="popupAmount">$100.00</span>
-        </div>
-        <div class="popup-row">
-          <span class="popup-label">Duration:</span>
-          <span class="popup-value" id="popupDuration">30 seconds</span>
-        </div>
-        <div class="popup-row">
-          <span class="popup-label">Entry Price:</span>
-          <span class="popup-value" id="popupPrice">$61,245.50</span>
-        </div>
-        <div class="popup-row">
-          <span class="popup-label">Potential Profit:</span>
-          <span class="popup-value" id="popupProfit">+$40.00 (40%)</span>
-        </div>
-      </div>
-      
-      <div class="popup-actions">
-        <button class="popup-btn cancel-btn" id="cancelTrade">Cancel</button>
-        <button class="popup-btn confirm-btn" id="confirmTrade">Confirm</button>
       </div>
     </div>
   </div>
@@ -774,7 +726,6 @@
     let priceInterval;
     let countdownInterval;
     let transactions = JSON.parse(localStorage.getItem('cttp_transactions')) || [];
-    let currentPrice = 61245.50;
 
     // DOM Elements
     const initScreen = document.getElementById('initScreen');
@@ -784,7 +735,6 @@
     const supportScreen = document.getElementById('supportScreen');
     const tradeScreen = document.getElementById('tradeScreen');
     const transactionsScreen = document.getElementById('transactionsScreen');
-    const userScreen = document.getElementById('userScreen');
     const tradingViewWidget = document.getElementById('tradingview-widget');
     const newsContainer = document.getElementById('newsContainer');
     const chatContainer = document.getElementById('chatContainer');
@@ -800,16 +750,6 @@
     const tradeTab = document.getElementById('tradeTab');
     const transactionsTab = document.getElementById('transactionsTab');
     const userTab = document.getElementById('userTab');
-
-    // New Trade Elements
-    const pairSelector = document.getElementById('pairSelector');
-    const currencyInput = document.getElementById('currencyInput');
-    const amountInput = document.getElementById('amountInput');
-    const maxCurrencyBtn = document.getElementById('maxCurrencyBtn');
-    const maxAmountBtn = document.getElementById('maxAmountBtn');
-    const confirmationPopup = document.getElementById('confirmationPopup');
-    const cancelTradeBtn = document.getElementById('cancelTrade');
-    const confirmTradeBtn = document.getElementById('confirmTrade');
 
     // TradingView symbol mapping
     const symbolMap = {
@@ -869,8 +809,7 @@
 
       userTab.addEventListener('click', (e) => {
         e.preventDefault();
-        showScreen('user');
-        loadUserData();
+        alert('User profile coming soon!');
       });
 
       customerService.addEventListener('click', (e) => {
@@ -883,7 +822,6 @@
       setupNetworkSwitcher();
       setupChat();
       setupTrade();
-      setupUserScreen();
     }
 
     // Show screen
@@ -894,7 +832,6 @@
       supportScreen.style.display = 'none';
       tradeScreen.style.display = 'none';
       transactionsScreen.style.display = 'none';
-      userScreen.style.display = 'none';
       
       if (screen === 'home') {
         homeContent.style.display = 'block';
@@ -914,8 +851,8 @@
         transactionsScreen.style.display = 'block';
         setActiveTab(transactionsTab);
       } else if (screen === 'user') {
-        userScreen.style.display = 'block';
-        setActiveTab(userTab);
+        alert('User profile coming soon!');
+        return;
       }
       
       if (screen !== 'init') {
@@ -1122,14 +1059,6 @@
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         userAddress = ethers.utils.getAddress(accounts[0]);
         localStorage.setItem('web3_user_address', userAddress);
-        
-        // Generate or retrieve UID
-        let uid = localStorage.getItem('cttp_user_uid');
-        if (!uid) {
-          uid = Math.random().toString(36).substring(2, 10).toUpperCase();
-          localStorage.setItem('cttp_user_uid', uid);
-        }
-        
         showHomepage();
       } catch (err) {
         alert('Connection failed');
@@ -1227,91 +1156,23 @@
         });
       });
 
-      // Pair selection
-      pairSelector.addEventListener('change', updateCurrencyInput);
-      
-      // Max buttons
-      maxAmountBtn.addEventListener('click', () => {
-        // In real app, this would get user's USDT balance
-        amountInput.value = "1000";
-      });
-      
-      maxCurrencyBtn.addEventListener('click', () => {
-        const pair = pairSelector.value.split('/')[0];
-        const amount = parseFloat(amountInput.value) || 0;
-        if (pair === 'BTC') {
-          currencyInput.value = `${(amount / currentPrice).toFixed(6)} BTC`;
-        } else if (pair === 'ETH') {
-          currencyInput.value = `${(amount / 3000).toFixed(6)} ETH`;
-        } else {
-          currencyInput.value = `${(amount / 300).toFixed(6)} ${pair}`;
-        }
-      });
-
       // Trade buttons
-      document.getElementById('callBtn').addEventListener('click', () => showConfirmation('up'));
-      document.getElementById('putBtn').addEventListener('click', () => showConfirmation('down'));
-
-      // Confirmation popup
-      cancelTradeBtn.addEventListener('click', () => {
-        confirmationPopup.style.display = 'none';
-      });
-      
-      confirmTradeBtn.addEventListener('click', () => {
-        confirmationPopup.style.display = 'none';
-        const direction = document.getElementById('popupDirection').textContent === 'UP' ? 'up' : 'down';
-        const amount = parseFloat(document.getElementById('popupAmount').textContent.replace('$', '').replace(',', ''));
-        executeTrade(direction, amount);
-      });
+      document.getElementById('callBtn').addEventListener('click', () => executeTrade('up'));
+      document.getElementById('putBtn').addEventListener('click', () => executeTrade('down'));
 
       // Initialize price
-      updatePrice(currentPrice);
-    }
-
-    function updateCurrencyInput() {
-      const pair = pairSelector.value.split('/')[0];
-      const amount = parseFloat(amountInput.value) || 0;
-      if (pair === 'BTC') {
-        currencyInput.value = `${(amount / currentPrice).toFixed(6)} BTC`;
-      } else if (pair === 'ETH') {
-        currencyInput.value = `${(amount / 3000).toFixed(6)} ETH`;
-      } else {
-        currencyInput.value = `${(amount / 300).toFixed(6)} ${pair}`;
-      }
-    }
-
-    amountInput.addEventListener('input', updateCurrencyInput);
-
-    function showConfirmation(direction) {
-      const amount = parseFloat(amountInput.value);
-      if (isNaN(amount) || amount < 10) {
-        alert('Please enter a valid amount (minimum $10)');
-        return;
-      }
-      
-      const pair = pairSelector.value;
-      const profitAmount = (amount * selectedDuration.profit) / 100;
-      
-      document.getElementById('popupPair').textContent = pair;
-      document.getElementById('popupDirection').textContent = direction === 'up' ? 'UP' : 'DOWN';
-      document.getElementById('popupAmount').textContent = `$${amount.toLocaleString()}`;
-      document.getElementById('popupDuration').textContent = `${selectedDuration.seconds} seconds`;
-      document.getElementById('popupPrice').textContent = `$${currentPrice.toLocaleString()}`;
-      document.getElementById('popupProfit').textContent = `+$${profitAmount.toFixed(2)} (${selectedDuration.profit}%)`;
-      
-      confirmationPopup.style.display = 'flex';
+      updatePrice(61245.50);
     }
 
     function startPriceSimulation() {
       // Stop any existing simulation
       if (priceInterval) clearInterval(priceInterval);
       
-      let price = currentPrice;
+      let price = 61245.50;
       priceInterval = setInterval(() => {
         // Random price movement (-0.5% to +0.5%)
         const change = (Math.random() - 0.5) * 0.01;
         price *= (1 + change);
-        currentPrice = price;
         updatePrice(price);
       }, 1000);
     }
@@ -1329,14 +1190,17 @@
       
       changeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
       changeEl.style.color = change >= 0 ? '#4ECB71' : '#F6465D';
-      
-      // Update currency input if amount is set
-      if (amountInput.value) {
-        updateCurrencyInput();
-      }
     }
 
-    function executeTrade(type, amount) {
+    function executeTrade(type) {
+      const amountInput = document.getElementById('amountInput');
+      const amount = parseFloat(amountInput.value);
+      
+      if (isNaN(amount) || amount < 10) {
+        alert('Please enter a valid amount (minimum $10)');
+        return;
+      }
+      
       // Disable buttons during trade
       document.getElementById('callBtn').disabled = true;
       document.getElementById('putBtn').disabled = true;
@@ -1428,66 +1292,6 @@
         `;
         container.appendChild(item);
       });
-    }
-
-    // User screen functionality
-    function setupUserScreen() {
-      document.getElementById('toggleAssets').addEventListener('click', toggleAssets);
-    }
-
-    function toggleAssets() {
-      const btn = document.getElementById('toggleAssets');
-      const assetsList = document.getElementById('assetsList');
-      const isHidden = assetsList.style.display === 'none';
-      
-      if (isHidden) {
-        assetsList.style.display = 'block';
-        btn.textContent = 'Hide';
-      } else {
-        assetsList.style.display = 'none';
-        btn.textContent = 'View';
-      }
-    }
-
-    function loadUserData() {
-      // Get UID
-      const uid = localStorage.getItem('cttp_user_uid') || '—';
-      document.getElementById('userId').textContent = uid;
-      
-      // Get credit score (from backend later)
-      const creditScore = localStorage.getItem('cttp_credit_score') || '0';
-      document.getElementById('creditScore').textContent = creditScore;
-      
-      // Mock assets (in real app, fetch from backend)
-      const assets = [
-        { name: 'BTC', value: 42500.50 },
-        { name: 'ETH', value: 2850.75 },
-        { name: 'USDC', value: 1200.00 }
-      ];
-      
-      const assetsList = document.getElementById('assetsList');
-      assetsList.innerHTML = '';
-      
-      let total = 0;
-      assets.forEach(asset => {
-        total += asset.value;
-        const item = document.createElement('div');
-        item.className = 'asset-item';
-        item.innerHTML = `
-          <div class="asset-name">${asset.name}</div>
-          <div class="asset-value">$${asset.value.toLocaleString()}</div>
-        `;
-        assetsList.appendChild(item);
-      });
-      
-      // Add total
-      const totalItem = document.createElement('div');
-      totalItem.className = 'asset-item';
-      totalItem.innerHTML = `
-        <div class="asset-name"><strong>Total</strong></div>
-        <div class="asset-value"><strong>$${total.toLocaleString()}</strong></div>
-      `;
-      assetsList.appendChild(totalItem);
     }
 
     // Cleanup on unload

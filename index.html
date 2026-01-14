@@ -120,7 +120,7 @@
       color: #000;
       box-shadow: 0 4px 6px rgba(240, 185, 11, 0.3);
     }
-    .home-content, .market-screen, .chart-screen, .support-screen, .trade-screen, .transactions-screen {
+    .home-content, .market-screen, .chart-screen, .support-screen, .trade-screen, .transactions-screen, .user-screen {
       display: none;
       padding: 0 16px;
       margin-top: 70px;
@@ -193,346 +193,75 @@
       fill: currentColor;
     }
     
-    /* Binance-Style Market Table */
-    .market-header {
-      display: grid;
-      grid-template-columns: 3fr 2fr 2fr 2fr;
-      padding: 12px 16px;
-      font-weight: 600;
-      color: #6C7284;
-      border-bottom: 1px solid #2a2f3a;
-      margin-top: 12px;
-    }
-    .market-row {
-      display: grid;
-      grid-template-columns: 3fr 2fr 2fr 2fr;
-      padding: 14px 16px;
-      border-bottom: 1px solid #23262F;
-      cursor: pointer;
-    }
-    .market-row:hover {
-      background: #1B1F2B;
-    }
-    .coin-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .coin-logo {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .price-col, .change-col, .volume-col {
-      text-align: right;
-      font-weight: 500;
-    }
-    .positive { color: #4ECB71; }
-    .negative { color: #F6465D; }
-    
-    /* Chart Screen */
-    .chart-header {
-      display: flex;
-      align-items: center;
-      padding: 16px 16px 12px;
-      color: white;
-    }
-    .back-btn {
-      background: #F0B90B;
-      color: #000;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-right: 12px;
-    }
-    #tradingview-widget {
-      width: 100%;
-      height: 300px;
-      border-radius: 12px;
-      overflow: hidden;
+    /* User Screen */
+    .user-card {
       background: #161A24;
-      position: relative;
-    }
-    #tradingview-widget iframe {
-      width: 100% !important;
-      height: 100% !important;
-    }
-    .timeframes {
-      display: flex;
-      gap: 8px;
-      margin: 12px 0;
-      flex-wrap: wrap;
-    }
-    .tf-btn {
-      padding: 6px 12px;
-      border: 1px solid #2a2f3a;
-      background: #161A24;
-      color: #EAECEF;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .tf-btn.active {
-      background: #F0B90B;
-      color: #000;
-    }
-    
-    /* News Section */
-    .news-header {
-      font-size: 16px;
-      font-weight: 600;
-      margin: 20px 0 12px;
-      color: white;
-    }
-    .news-item {
-      background: #161A24;
-      padding: 12px;
-      border-radius: 12px;
-      margin-bottom: 12px;
-      font-size: 14px;
-    }
-    .news-title {
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: #F0B90B;
-    }
-    .news-source {
-      color: #6C7284;
-      font-size: 12px;
-    }
-    
-    /* Support Screen */
-    .support-header {
-      text-align: center;
+      padding: 20px;
+      border-radius: 16px;
       margin-bottom: 24px;
     }
-    .support-header h2 {
-      font-size: 22px;
+    .user-id {
+      font-size: 14px;
+      color: #6C7284;
       margin-bottom: 8px;
     }
-    .support-header p {
-      color: #6C7284;
-      font-size: 14px;
-    }
-    .chat-container {
-      height: 300px;
-      background: #161A24;
-      border-radius: 12px;
-      padding: 16px;
-      overflow-y: auto;
-      margin-bottom: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-    .message {
-      padding: 10px 12px;
-      border-radius: 12px;
-      margin-bottom: 12px;
-      max-width: 80%;
-      word-break: break-word;
-    }
-    .user-message {
-      background: #F0B90B;
-      color: #000;
-      align-self: flex-end;
-    }
-    .support-message {
-      background: #2A2E39;
-      color: #EAECEF;
-      align-self: flex-start;
-    }
-    .input-area {
-      display: flex;
-      gap: 8px;
-    }
-    .message-input {
-      flex: 1;
-      padding: 12px;
-      border: 1px solid #2a2f3a;
-      border-radius: 8px;
-      background: #161A24;
-      color: #EAECEF;
-    }
-    .send-btn {
-      padding: 12px 20px;
-      background: #F0B90B;
-      color: #000;
-      border: none;
-      border-radius: 8px;
+    .user-id-value {
       font-weight: 600;
-      cursor: pointer;
-    }
-    .quick-actions {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 16px;
-    }
-    .quick-btn {
-      padding: 12px;
-      background: #161A24;
-      border: 1px solid #2a2f3a;
-      border-radius: 8px;
-      color: #EAECEF;
-      text-align: center;
-      cursor: pointer;
-    }
-    .quick-btn:hover {
-      background: #1B1F2B;
-    }
-    
-    /* Trade Screen */
-    .trade-header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .trade-header h2 {
-      font-size: 22px;
-      margin-bottom: 8px;
-    }
-    .trade-header p {
-      color: #6C7284;
-      font-size: 14px;
-    }
-    .current-price {
-      font-size: 24px;
-      font-weight: bold;
-      text-align: center;
-      margin: 16px 0;
-      color: #4ECB71;
-    }
-    .price-change {
-      text-align: center;
-      font-size: 14px;
-      color: #4ECB71;
-      margin-bottom: 24px;
-    }
-    .amount-input {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid #2a2f3a;
-      border-radius: 12px;
-      background: #161A24;
-      color: #EAECEF;
-      font-size: 16px;
-      margin-bottom: 24px;
-    }
-    .duration-options {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .duration-btn {
-      padding: 16px;
-      background: #161A24;
-      border: 1px solid #2a2f3a;
-      border-radius: 12px;
-      color: #EAECEF;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .duration-btn.active {
-      background: #F0B90B;
-      color: #000;
-      border-color: #F0B90B;
-    }
-    .profit-label {
-      font-size: 14px;
-      color: #6C7284;
-      margin-top: 4px;
-    }
-    
-    /* Professional Trade Buttons */
-    .trade-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-    }
-    .trade-btn {
-      flex: 1;
-      padding: 16px;
-      border: none;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 18px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.1s;
-    }
-    .trade-btn:active {
-      transform: scale(0.98);
-    }
-    .call-btn {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: white;
-    }
-    .put-btn {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: white;
-    }
-    .arrow {
-      font-size: 24px;
-      margin-bottom: 4px;
-    }
-    .label {
-      font-size: 14px;
-      font-weight: 600;
-    }
-    
-    .countdown {
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      margin: 16px 0;
       color: #F0B90B;
     }
-    .result {
-      text-align: center;
-      padding: 16px;
-      border-radius: 12px;
+    .credit-score {
+      font-size: 18px;
+      font-weight: 600;
       margin: 16px 0;
-    }
-    .win {
-      background: rgba(78, 203, 113, 0.2);
       color: #4ECB71;
     }
-    .loss {
-      background: rgba(246, 70, 93, 0.2);
-      color: #F6465D;
+    .assets-section {
+      margin-top: 24px;
     }
-    
-    /* Transactions Screen */
-    .transaction-item {
-      background: #161A24;
-      padding: 16px;
-      border-radius: 12px;
-      margin-bottom: 12px;
-    }
-    .transaction-header {
+    .assets-header {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 8px;
+      align-items: center;
+      margin-bottom: 12px;
     }
-    .transaction-amount {
+    .toggle-btn {
+      background: #2A2E39;
+      border: 1px solid #2a2f3a;
+      color: #EAECEF;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .toggle-btn:hover {
+      background: #334155;
+    }
+    .assets-list {
+      background: #2A2E39;
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .asset-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #334155;
+    }
+    .asset-item:last-child {
+      border-bottom: none;
+    }
+    .asset-name {
+      color: #EAECEF;
+    }
+    .asset-value {
+      color: #4ECB71;
       font-weight: 600;
     }
-    .transaction-profit {
-      font-size: 14px;
+    .hidden-assets {
       color: #6C7284;
-    }
-    .win-text { color: #4ECB71; }
-    .loss-text { color: #F6465D; }
-    .transaction-time {
-      font-size: 12px;
-      color: #6C7284;
+      font-style: italic;
+      padding: 16px;
+      text-align: center;
     }
   </style>
 </head>
@@ -680,6 +409,28 @@
         <!-- Transactions will appear here -->
       </div>
     </div>
+
+    <!-- User Screen -->
+    <div class="user-screen" id="userScreen">
+      <div class="user-card">
+        <div class="user-id">
+          User ID: <span class="user-id-value" id="userId">—</span>
+        </div>
+        <div class="credit-score">
+          Credit Score: <span id="creditScore">0</span>
+        </div>
+        
+        <div class="assets-section">
+          <div class="assets-header">
+            <div>Assets (USD)</div>
+            <button class="toggle-btn" id="toggleAssets">Hide</button>
+          </div>
+          <div class="assets-list" id="assetsList">
+            <!-- Assets will appear here -->
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Bottom Navigation -->
@@ -735,6 +486,7 @@
     const supportScreen = document.getElementById('supportScreen');
     const tradeScreen = document.getElementById('tradeScreen');
     const transactionsScreen = document.getElementById('transactionsScreen');
+    const userScreen = document.getElementById('userScreen');
     const tradingViewWidget = document.getElementById('tradingview-widget');
     const newsContainer = document.getElementById('newsContainer');
     const chatContainer = document.getElementById('chatContainer');
@@ -809,7 +561,8 @@
 
       userTab.addEventListener('click', (e) => {
         e.preventDefault();
-        alert('User profile coming soon!');
+        showScreen('user');
+        loadUserData();
       });
 
       customerService.addEventListener('click', (e) => {
@@ -822,6 +575,7 @@
       setupNetworkSwitcher();
       setupChat();
       setupTrade();
+      setupUserScreen();
     }
 
     // Show screen
@@ -832,6 +586,7 @@
       supportScreen.style.display = 'none';
       tradeScreen.style.display = 'none';
       transactionsScreen.style.display = 'none';
+      userScreen.style.display = 'none';
       
       if (screen === 'home') {
         homeContent.style.display = 'block';
@@ -851,8 +606,8 @@
         transactionsScreen.style.display = 'block';
         setActiveTab(transactionsTab);
       } else if (screen === 'user') {
-        alert('User profile coming soon!');
-        return;
+        userScreen.style.display = 'block';
+        setActiveTab(userTab);
       }
       
       if (screen !== 'init') {
@@ -1059,6 +814,14 @@
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         userAddress = ethers.utils.getAddress(accounts[0]);
         localStorage.setItem('web3_user_address', userAddress);
+        
+        // Generate or retrieve UID
+        let uid = localStorage.getItem('cttp_user_uid');
+        if (!uid) {
+          uid = Math.random().toString(36).substring(2, 10).toUpperCase();
+          localStorage.setItem('cttp_user_uid', uid);
+        }
+        
         showHomepage();
       } catch (err) {
         alert('Connection failed');
@@ -1292,6 +1055,66 @@
         `;
         container.appendChild(item);
       });
+    }
+
+    // User screen functionality
+    function setupUserScreen() {
+      document.getElementById('toggleAssets').addEventListener('click', toggleAssets);
+    }
+
+    function toggleAssets() {
+      const btn = document.getElementById('toggleAssets');
+      const assetsList = document.getElementById('assetsList');
+      const isHidden = assetsList.style.display === 'none';
+      
+      if (isHidden) {
+        assetsList.style.display = 'block';
+        btn.textContent = 'Hide';
+      } else {
+        assetsList.style.display = 'none';
+        btn.textContent = 'View';
+      }
+    }
+
+    function loadUserData() {
+      // Get UID
+      const uid = localStorage.getItem('cttp_user_uid') || '—';
+      document.getElementById('userId').textContent = uid;
+      
+      // Get credit score (from backend later)
+      const creditScore = localStorage.getItem('cttp_credit_score') || '0';
+      document.getElementById('creditScore').textContent = creditScore;
+      
+      // Mock assets (in real app, fetch from backend)
+      const assets = [
+        { name: 'BTC', value: 42500.50 },
+        { name: 'ETH', value: 2850.75 },
+        { name: 'USDC', value: 1200.00 }
+      ];
+      
+      const assetsList = document.getElementById('assetsList');
+      assetsList.innerHTML = '';
+      
+      let total = 0;
+      assets.forEach(asset => {
+        total += asset.value;
+        const item = document.createElement('div');
+        item.className = 'asset-item';
+        item.innerHTML = `
+          <div class="asset-name">${asset.name}</div>
+          <div class="asset-value">$${asset.value.toLocaleString()}</div>
+        `;
+        assetsList.appendChild(item);
+      });
+      
+      // Add total
+      const totalItem = document.createElement('div');
+      totalItem.className = 'asset-item';
+      totalItem.innerHTML = `
+        <div class="asset-name"><strong>Total</strong></div>
+        <div class="asset-value"><strong>$${total.toLocaleString()}</strong></div>
+      `;
+      assetsList.appendChild(totalItem);
     }
 
     // Cleanup on unload
